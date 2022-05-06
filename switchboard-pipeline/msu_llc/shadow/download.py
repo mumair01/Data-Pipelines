@@ -2,11 +2,18 @@
 # @Author: Muhammad Umair
 # @Date:   2022-03-04 17:34:04
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-03-17 10:07:13
+# @Last Modified time: 2022-05-06 16:33:16
 import sys
 import os
 from utils import *
 from tqdm import tqdm
+
+
+# GLOBALS
+MSU_SB_URL = "https://us.openslr.org/resources/5/switchboard_word_alignments.tar.gz"
+MSU_SB_NAME = "msu_switchboard"
+LC_SB_URL = "https://web.stanford.edu/~jurafsky/swb1_dialogact_annot.tar.gz"
+LC_SB_NAME = "lc_switchboard"
 
 
 def download_dataset(url, name, result_dir):
@@ -24,8 +31,7 @@ def download_dataset(url, name, result_dir):
 def download_msu(result_dir):
 
     # Constants
-    MSU_SB_URL = "https://us.openslr.org/resources/5/switchboard_word_alignments.tar.gz"
-    MSU_SB_NAME = "msu_switchboard"
+
     _, extract_dir = download_dataset(
         MSU_SB_URL, MSU_SB_NAME, result_dir)
     msu_data_path = os.path.join(
@@ -39,8 +45,6 @@ def download_msu(result_dir):
 
 
 def download_lc(result_dir):
-    LC_SB_URL = "https://web.stanford.edu/~jurafsky/swb1_dialogact_annot.tar.gz"
-    LC_SB_NAME = "lc_switchboard"
     _, extract_dir = download_dataset(
         LC_SB_URL, LC_SB_NAME, result_dir)
     lc_data_path = os.path.join(
