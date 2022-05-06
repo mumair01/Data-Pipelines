@@ -2,10 +2,12 @@
 # @Author: Muhammad Umair
 # @Date:   2022-03-09 14:09:09
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-05-06 14:31:27
+# @Last Modified time: 2022-05-06 16:02:49
 
 # NOTE: Downloads the daily dialogue corpus from huggingface.
 
+import shutil
+import argparse
 import itertools
 from copy import deepcopy
 from sklearn.utils import shuffle
@@ -19,12 +21,6 @@ assert sklearn.__version__ >= "0.20"
 # TensorFlow ≥2.0 is required
 assert tf.__version__ >= "2.0"
 # Common imports
-
-
-# PROJECT_ROOT_DIR = "/cluster/home/mumair01/deruiterlab/shared/mumair01"
-PROJECT_ROOT_DIR = "."
-DATASETS_DIR = os.path.join(PROJECT_ROOT_DIR, "datasets")
-DAILY_DIALOG_DATA_DIR = os.path.join(DATASETS_DIR, "daily_dialog")
 
 
 def preprocess_huggingface_daily_dialogue(dataset):
@@ -66,28 +62,43 @@ def save_processed_to_file(save_dir, filename, dataset):
             f.writelines(item + "\n")
 
 
-def parse_and_save_dd_dataset(datasets, dataset_type):
+def parse_and_save_dd_dataset(datasets, dataset_type, output_dir):
     dataset = datasets[dataset_type]['dialog']
     processed_dataset = preprocess_huggingface_daily_dialogue(dataset)
     save_processed_to_file(
-        DAILY_DIALOG_DATA_DIR, dataset_type, processed_dataset)
+        output_dir, dataset_type, processed_dataset)
 
 
-def download_daily_dialogue():
+def download_daily_dialogue(output_dir, seed=None):
     """
     Download the daily dialogue dataset and store it in files that
     can be used for trainingand evaluation.
     """
+    os.makedirs(output_dir, exist_ok=True)
+    if seed != None:
+        np.random.seed(seed)
+    print("Downloading dataset...")
     datasets = load_dataset('daily_dialog')
     # Create the save directory
-    os.makedirs(DAILY_DIALOG_DATA_DIR, exist_ok=True)
+    result_dir = os.path.join(output_dir, "daily_dialog")
+    if os.path.isdir(result_dir):
+        shutil.rmtree(result_dir)
+    os.makedirs(result_dir, exist_ok=True)
     # Parse and save training, val, and test splits.
     for dataset_type in ("train", "validation", "test"):
-        parse_and_save_dd_dataset(datasets, dataset_type)
+        print("Parsing and saving split: {}".format(dataset_type))
+        parse_and_save_dd_dataset(datasets, dataset_type, result_dir)
+    print("Daily dialog downloaded to: {}".format(output_dir))
 
 
 if __name__ == "__main__":
-    # Set the random seed to obtain consistent split
-    np.random.seed(42)
+    # Obtain args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out_dir", dest="out_dir", type=str, required=True,
+                        help="Path to the output directory")
+    args = parser.parse_args()
     # Download the daily dialog dataset
-    download_daily_dialogue()
+    download_daily_dialogue(
+        output_dir=args.out_dir,
+        seed=42
+    )
