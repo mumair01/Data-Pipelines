@@ -1,0 +1,29 @@
+DATE: 5/9/22
+- Started implementing the pipeline
+- Added ability to download the maptask corpus including the audio.
+- Added ability to separate the left and right tracks of the downloaded audio.
+- Added ability to use opensmile binaries to extract genome features
+
+
+DATE: 5/10/22
+- Audio download shell script moved to a shell scripts folder to separate scripts.
+- Tested method to extract gemap features as expected in the original code.
+    - Now uses downloaded opensmile binary from: https://github.com/audeering/opensmile/releases
+    - Binary used to extract audio features using opensmile config files by Skantze.
+
+DATE: 5/11/22
+- Implementing the get vocabulary method based on the existing implementation.
+- There can be another class called MapTaskProcessor that is specific to
+    a specific MapTask pipeline.
+- There can be a general pipeline class that can manage the Threads etc.
+- Notes for when refactoring:
+    - Potential classes:
+        1. MapTask class --> Responsible for downloading and parsing the corpus.
+    - Features to add when refactoring:
+        1. Method for obtaining the files in different directories.
+        2. Method for obtaining all files and / or sub-dirs in a dir.
+        3. General methods for parsing the downloaded data.
+        4. Method for collecting files based on common filenames.
+        5. Method to extract features given an audio file.
+        6. Methods to write to different file formats i.e., hd5, pickle, json etc.
+        7. Methods for parsing specific xml files in the original MapTask data.
