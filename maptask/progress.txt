@@ -27,3 +27,30 @@ DATE: 5/11/22
         5. Method to extract features given an audio file.
         6. Methods to write to different file formats i.e., hd5, pickle, json etc.
         7. Methods for parsing specific xml files in the original MapTask data.
+
+- IMPORTANT: Added the pipeline up to get average word annotations - choosing not to move
+forward because a lot of code is being re-used and it is becoming difficult
+to understand.
+
+- Notes about the MapTask corpus
+    - f and g stand for "follower" and "giver" for the participants in the dialogue.
+    - Left channel is the follower and right is the giver.
+    - For the maptask filename:
+        1. qx --> x is the quad number.
+        2. nc or ec --> nc is no eye contact and ec is eye contact.
+        3. xxxxY --> Y is the dialogue number.
+
+
+DATE: 5/12/22
+- Building the refactored pipeline:
+    1. Copied the Threads class from GaiBot to multithread but thinking to
+        use multithreading package instead.
+    2. Creating a separate script that extract audio features using opensmile
+        - This can be reused later.
+
+DATE: 5/13/22
+- Picking up and continuing the work outlined for 5/12/22.
+- Created a refactored and somewhat more modular pipeline.
+- Next step is to create POC notebooks to investigate what the features actually mean.
+
+
