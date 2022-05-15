@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-05-11 15:12:41
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-05-12 18:21:40
+# @Last Modified time: 2022-05-13 15:26:08
 
 from corpus_scripts.maptask import MapTask
 from pipeline import MapTaskPipelineSkantze
@@ -16,8 +16,7 @@ def execute_pipeline():
     )
     pipeline = MapTaskPipelineSkantze(maptask)
     pipeline.run(
-        output_dir="./pipeline_results"
-    )
+output_dir="./pipeline_results")
 
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@ maxF = -1
 nPointsTarget = 0
 specSmooth = 1
 specEnhance = 1
-auditoryWeighting = 1 
+auditoryWeighting = 1
 
 [gemapsv01a_shs:cPitchShs]
 reader.dmLevel=gemapsv01a_hpsG60
@@ -227,7 +227,7 @@ firstCC = 0
 lpOrder = 5
 cepLifter = 22
 compression = 0.33
-htkcompatible = 0 
+htkcompatible = 0
 doIDFT = 0
 doLpToCeps = 0
 doLP = 0
@@ -257,7 +257,7 @@ instance[gemapsv01a_formantLpc].type=cFormantLpc
 
 [gemapsv01a_resampLpc:cSpecResample]
 // use fftcG60 ?  H25 has faster resampling
-reader.dmLevel=gemapsv01a_fftcH25 
+reader.dmLevel=gemapsv01a_fftcH25
 writer.dmLevel=gemapsv01a_outpR
 targetFs = 11000
 

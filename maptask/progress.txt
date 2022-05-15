@@ -52,5 +52,14 @@ DATE: 5/13/22
 - Picking up and continuing the work outlined for 5/12/22.
 - Created a refactored and somewhat more modular pipeline.
 - Next step is to create POC notebooks to investigate what the features actually mean.
+- Determining the exact features produces by opensmile:
+    - Downloaded, installed, and added opensmile to default .zshrc path.
+    - Investigated the exact configurations and the audio features that were being
+    used by opensmile.
+        - In roddy's code, he is using eGemapsv01a --> We not use eGemapsv02.
+        - To use opensmile, all the Gemaps and eGemaps config files have to be
+            copied, along with the shared files.
+            See link: https://audeering.github.io/opensmile/get-started.html#default-feature-sets
+
 
 
