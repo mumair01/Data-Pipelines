@@ -53,6 +53,7 @@ DATE: 5/13/22
 - Created a refactored and somewhat more modular pipeline.
 - Next step is to create POC notebooks to investigate what the features actually mean.
 - Determining the exact features produces by opensmile:
+    - NOTE: This has been done in the opensmile_tests directory!
     - Downloaded, installed, and added opensmile to default .zshrc path.
     - Investigated the exact configurations and the audio features that were being
     used by opensmile.
@@ -60,6 +61,108 @@ DATE: 5/13/22
         - To use opensmile, all the Gemaps and eGemaps config files have to be
             copied, along with the shared files.
             See link: https://audeering.github.io/opensmile/get-started.html#default-feature-sets
+
+
+DATE: 5/15/22
+- Developing notebooks for extracting and understanding features:
+    - NOTE: This notebook is specifically trying to obtain features that were
+        used in the original Skantze paper.
+    - NOTE: This is in the notebooks directory.
+- Created methods for extracting voice activity annotations and pitch features.
+- TODO:
+    - Still need to investigate what the z-normalized pooled features are and
+    why they are being used.
+
+DATE: 5/16/22
+- Continuing work on skantze_pipeline_poc notebook.
+    - Previously had developed methods for extracting:
+        1. Voice activity annotations.
+        2. Extracting features using Opensmile.
+        3. Creating a Pitch feature dataframe using opensmile feature + voice
+            activity annotations.
+    - Planning on working on the following today:
+        - Obtaining spectral stability.
+        - Obtaining the parts of speech annotations.
+    - Progress today:
+        1. Implemented method for extracting voice activity annotations.
+            - Annotations for each frame are obtained.
+            - The start and end times of a word are used to determine how many
+                frames it spans.
+        2. Implemented method for extracting Pitch
+            - In the original paper, a single measure of pitch is used.
+            - Since I have gemaps available through opensmile, I used
+                F0semitoneFrom27.5Hz_sma3nz as a pitch feature.
+        3. Implemented method for extracting intensity.
+            - For gemaps, this was "Loudness_sma3", extracted similarly to Pitch.
+        4. Implemented method for extracting delayed POS annotations.
+            - This took a while to implement.
+            - The pos tags are annotated in .pos files but these do not have start
+                or end time annotations. Instead, they reference the timed-unit
+                files. Therefore, I had to read both files and match the ids.
+            - There are 59 POS tags annotated in MapTask.
+            - First, I extract the end times and pos annotations from MapTask.
+            - Next I create a mapping from POS tag to a unique integer.
+            - Then I use the sklearn one hot encoder, fit it on the POS tags mapping,
+                and encode each POS tag as a 59 feature vector.
+            - To introduce delay, find the closest frame to word end time + DELAY_TIME
+                and add the POS tag there.
+            - All frames for which there are no tags are all zeros.
+
+    - Next TODO:
+        - Implement the Spectral Stability methods
+        - Create scripts to extract these features for all files.
+- Resources found:
+    - PyTorch audio also provides methods for extracting / transforming
+    individual audio features, which may be useful later.
+        https://pytorch.org/audio/stable/tutorials/audio_feature_extractions_tutorial.html#pitch
+
+
+DATE: 5/17/22
+
+- Goals for today:
+    1. Continue to develop the pipeline for the skantze 2017 paper in the
+        skantze_pipeline_poc notebook. --> Extract spectral stability.
+    2. Clean up the existing Maptask folders to separate the different pipelines.
+    3. Create methods to generate results for all data files - Skantze 2018 pipeline.
+
+- Progress today:
+    1. Extracting Spectral Stability - Skantze 2017 pipeline.
+        - Can't use the same method as in the original paper - We are not
+        getting the power spectrum divided in N bands.
+        - Instead, we use Spectral Flux from the GeMAP features, which seems to
+        be the most similar metric.
+        - Fixing the notebooks to make sure that the individual feature
+        functions are standalone.
+    2. Clean up the existing Maptask folders to separate the different pipelines.
+        - Creating a separate download directory with the download script.
+        - Created a script to download the maptask corpus.
+        - Created a script to extract features from audio file directory.
+
+- TODO:
+    1. Extract gemaps for all the audio data.
+    2. Refactor the Skantze 2017 POC notebook to use a single version of the data.
+    2. Create a notebook to extract the skantze features for all the maptask files.
+
+DATE: 5/18/22
+- Goals for today:
+    1. Write a script based pipeline to extract all the features used for the
+        skantze 2017 paper.
+    2. Construct training, validation, and test set from the extracted features.
+    3. Develop algorithms for creating test sets for TRP prediction.
+
+- Progress today:
+    1. Wrote a pipeline to extract features as required by 2017 skantze.
+        - This script can generate both the full and prosody feature sets.
+        - The script takes methods from the skantze_pipeline_poc notebook.
+        - Note that the pipeline can only generate features for 50ms framesize.
+            - Issues with generating for 10ms frames:
+                1. Features from opensmile are 50ms frame size.
+                2. Not sure how to shift the features for 10ms as in Roddy
+                    - Not even sure if this is valid.
+
+- TODO:
+    1. Construct training, validation, and test set from the extracted features.
+    2. Develop algorithms for creating test sets for TRP prediction.
 
 
 

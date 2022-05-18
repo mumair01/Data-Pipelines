@@ -1,3 +1,8 @@
+#!/bin/bash
+# @Author: Muhammad Umair
+# @Date:   2022-05-11 14:45:43
+# @Last Modified by:   Muhammad Umair
+# @Last Modified time: 2022-05-17 16:36:22
 #!/bin/sh
 wget    -P signals/dialogues https://groups.inf.ed.ac.uk/maptask/signals/dialogues/q1ec1.mix.wav
 wget    -P signals/dialogues https://groups.inf.ed.ac.uk/maptask/signals/dialogues/q1ec2.mix.wav
