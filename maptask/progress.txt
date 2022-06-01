@@ -160,9 +160,8 @@ DATE: 5/18/22
                 2. Not sure how to shift the features for 10ms as in Roddy
                     - Not even sure if this is valid.
 
-- TODO:
-    1. Construct training, validation, and test set from the extracted features.
-    2. Develop algorithms for creating test sets for TRP prediction.
+
+
 
 
 
