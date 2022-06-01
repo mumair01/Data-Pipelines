@@ -160,6 +160,17 @@ DATE: 5/18/22
                 2. Not sure how to shift the features for 10ms as in Roddy
                     - Not even sure if this is valid.
 
+DATE: 6/1/22
+- Progress for today:
+    1. Verifying GeMaps data for the corpus
+        - q1ec1 files both participants are not producing the correct
+            delimiters for some reason - not using these in final dataset.
+        - Remove duplicated frameTime from the gemaps data i.e., all the data
+            will not be unique.
+        - Creating methods for verifying the gemaps data
+    2. Moving the Skantze pipeline for the MapTaks corpus into the TRP-Modeling
+        repo. because it is a specific use of the MapTask corpus for a specific
+        problem.
 
 
 
