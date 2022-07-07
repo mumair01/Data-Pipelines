@@ -130,8 +130,9 @@ dmypy.json
 
 
 .DS_Store
-**/test/**
-**/opensmile*
+test/
+opensmile/
 
-**/pipeline_results/**
-**/maptaskv*/**
+
+pipeline_results/
+maptaskv*/
