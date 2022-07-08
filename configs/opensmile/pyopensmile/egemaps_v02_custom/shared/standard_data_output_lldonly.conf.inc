@@ -2,7 +2,7 @@
 ///////// > openSMILE configuration file for data output <           //////////////////
 /////////                                                            //////////////////
 ///////// (c) 2014-2016 audEERING,                                   //////////////////
-/////////     All rights reserverd. See file COPYING for details     //////////////////
+/////////     All rights reserved. See file COPYING for details     //////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
 

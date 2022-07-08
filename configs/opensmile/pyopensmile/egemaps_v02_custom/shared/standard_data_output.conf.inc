@@ -2,7 +2,7 @@
 ///////// > openSMILE configuration file for data output <           //////////////////
 /////////                                                            //////////////////
 ///////// (c) 2014-2016 audEERING,                                   //////////////////
-/////////     All rights reserverd. See file COPYING for details     //////////////////
+/////////     All rights reserved. See file COPYING for details     //////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -33,7 +33,6 @@ instanceName=\cm[instname(N){unknown}:instance name]
 append = \cm[appendcsvlld{0}:set to 1 to append to the LLD output csv file, default is not to append]
 timestamp = \cm[timestampcsvlld{1}:set to 0 to suppress timestamp column, default is 1, i.e. to show timestamp in second column]
 number = 0
-delimChar = ,
 printHeader = \cm[headercsvlld{1}:set to 0 to suppress header line with feature names, default is 1, i.e. to show header line]
 errorOnNoOutput = 1
 
