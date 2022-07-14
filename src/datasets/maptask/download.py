@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-05-17 15:17:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-11 18:19:34
+# @Last Modified time: 2022-07-14 16:47:57
 
 import argparse
 import tqdm
@@ -162,6 +162,13 @@ class MapTaskDownloader:
         # Create the dirs
         self.download_dir = os.path.join(output_dir,self.DOWNLOAD_DIR)
         self.temp_dir = os.path.join(output_dir,self.TEMP_DIR)
+
+    def __call__(self):
+        annotations_path = self.download_annotations()
+        stereo_output_path, mono_output_path = \
+            self.download_signals(extract_mono=True)
+        return (annotations_path, stereo_output_path, mono_output_path)
+
 
     def download_annotations(self):
         download_path = os.path.join(
