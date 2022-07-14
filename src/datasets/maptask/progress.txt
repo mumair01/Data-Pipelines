@@ -172,6 +172,11 @@ DATE: 6/1/22
         repo. because it is a specific use of the MapTask corpus for a specific
         problem.
 
+DATE: 7/7/22
+- Progress:
+    1. Refactoring the repo. structure + adding functionality to make datasets
+        for ML.
+
 
 
 
