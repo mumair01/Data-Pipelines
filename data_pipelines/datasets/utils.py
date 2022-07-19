@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-15 15:51:24
+# @Last Modified time: 2022-07-19 16:19:30
 
 import os
 import requests
@@ -11,6 +11,9 @@ from pathlib import Path
 from pydub import AudioSegment
 from zipfile import ZipFile
 import shutil
+import audiofile
+from sklearn.model_selection import train_test_split
+from data_pipelines.features.opensmile import OpenSmile
 
 ############################# GENERAL UTILS ################################
 
@@ -70,3 +73,29 @@ def stereo_to_mono(stereo_path, output_dir,left_prefix="left",right_prefix="righ
     mono_left = mono_audios[0].export(left_path, format=ext)
     mono_right = mono_audios[1].export(right_path, format=ext)
     return mono_left, mono_right
+
+
+def extract_feature_set(audio_path, feature_set):
+    signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
+    smile = OpenSmile(
+        feature_set=feature_set,
+        feature_level="lld",
+        sample_rate=sampling_rate,
+        normalize=False)
+    f = smile(signal)
+    return {
+        "values" : f,
+        "features" : list(smile.idx2feat.values())
+    }
+
+
+######################## DATASET UTILS ##########################
+
+def get_train_val_test_splits(items, test_size, val_size,seed):
+    """Generate train, val, test splits."""
+    items = sorted(items)
+    train_dialogues, test_dialogues = train_test_split(
+        items, test_size=test_size,random_state=seed)
+    train_dialogues, val_dialogues = train_test_split(
+        items, test_size=val_size,random_state=seed)
+    return train_dialogues, val_dialogues, test_dialogues

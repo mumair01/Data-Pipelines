@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-05-17 15:17:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 11:16:35
+# @Last Modified time: 2022-07-19 14:39:43
 
 import argparse
 from cgitb import reset
@@ -16,7 +16,6 @@ import os
 from data_pipelines.datasets.utils import download_from_url, download_zip_from_url,\
                                 extract_from_zip, stereo_to_mono,reset_dir
 
-# ---------------------------------- GLOBALS -----------------------------------
 
 @dataclass
 class DownloadPaths:

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 12:59:19
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 13:02:41
+# @Last Modified time: 2022-07-19 16:19:23
 
 import sys
 import os
@@ -14,7 +14,6 @@ from sklearn.model_selection import train_test_split
 import datasets
 from datasets import Value, Audio, Array3D
 
-from data_pipelines.features.opensmile import OpenSmile
 from data_pipelines.datasets.maptask.download import MapTaskDownloader
 from data_pipelines.datasets.maptask.utils import (
     get_dialogues,
@@ -22,7 +21,9 @@ from data_pipelines.datasets.maptask.utils import (
     get_utterances,
     get_utterance_pos_annotations,
 )
-
+from data_pipelines.datasets.utils import (
+    get_train_val_test_splits, extract_feature_set
+)
 _MAPTASK_HOMEPAGE = "https://groups.inf.ed.ac.uk/maptask/"
 _MAPTASK_DESCRIPTION = "Maptask corpus custom dataset"
 _MAPTASK_CITATION = """\
@@ -129,9 +130,9 @@ class MapTask(datasets.GeneratorBasedBuilder):
             dataset_dir,
             force_download=dl_manager.download_config.force_download)
         self.download_paths = downloader()
-        # Generate the data splits from the dialoguess
+        # Generate the data splits from the dialogues
         dialogues = get_dialogues(self.download_paths.annotations_path)
-        train, val, test = self.__get_train_val_test_dialogues(
+        train, val, test = get_train_val_test_splits(
             dialogues, self.config.test_size, self.config.val_size)
         # Save the data splits
         tmp_path = os.path.join(dataset_dir,"splits")
@@ -181,7 +182,7 @@ class MapTask(datasets.GeneratorBasedBuilder):
                     mono_path = get_maptask_file(
                         self.download_paths.mono_path,dialogue,participant,"wav")
                     # Get audio features
-                    egemaps = self.__extract_egemaps(mono_path)
+                    egemaps = extract_feature_set(mono_path,'egemapsv02_50ms')
                     yield f"{dialogue}.{participant}", {
                         "dialogue" : dialogue,
                         "participant" : participant,
@@ -191,28 +192,3 @@ class MapTask(datasets.GeneratorBasedBuilder):
                             "mono" : mono_path
                         }
                     }
-
-    ############################## HELPER METHODS ############################
-
-    def __get_train_val_test_dialogues(self,dialogues, test_size, val_size):
-        """Generate train, val, test splits based on the dialogues"""
-        dialogues = sorted(dialogues)
-        train_dialogues, test_dialogues = train_test_split(dialogues,
-            test_size=test_size,random_state=self.config.seed)
-        train_dialogues, val_dialogues = train_test_split(train_dialogues,
-            test_size=val_size,random_state=self.config.seed)
-        return train_dialogues, val_dialogues, test_dialogues
-
-    def __extract_egemaps(self,audio_path):
-        signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
-        smile = OpenSmile(
-            feature_set="egemapsv02_50ms",
-            feature_level="lld",
-            sample_rate=sampling_rate,
-            normalize=False)
-        f = smile(signal)
-        return {
-            "values" : f,
-            "features" : list(smile.idx2feat.values())
-        }
-
