@@ -1,3 +1,32 @@
+[project]
+name = "data_pipelines"
+version = "0.0.1a"
+authors = [
+  { name="Muhammad Umair", email="umair.aarij@gmail.com" },
+]
+description = "Custom data pipeliens for use with machine learning projects"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/mumair01/Data-Pipelines"
+"Bug Tracker" = "https://github.com/mumair01/Data-Pipelines/issues"
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[options]
+package_dir="data_pipelines"
+
+
 # pyproject.toml
 [tool.pytest.ini_options]
 minversion = "6.0"
