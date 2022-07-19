@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-12 15:52:16
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-14 11:50:29
+# @Last Modified time: 2022-07-19 11:16:39
 
 ##############################
 # This script contains methods to extract various features from the maptask
@@ -20,7 +20,7 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.preprocessing import OneHotEncoder
 
-from src.datasets.maptask.utils import *
+from data_pipelines..datasets.maptask.utils import *
 
 
 ################################# GLOBALS ####################################

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-11 17:51:47
+# @Last Modified time: 2022-07-15 15:51:24
 
 import os
 import requests
@@ -10,6 +10,14 @@ from tqdm import tqdm
 from pathlib import Path
 from pydub import AudioSegment
 from zipfile import ZipFile
+import shutil
+
+############################# GENERAL UTILS ################################
+
+def reset_dir(dir_path):
+    if os.path.isdir(dir_path):
+        shutil.rmtree(dir_path)
+    os.makedirs(dir_path)
 
 ############################# DOWNLOAD UTILS ################################
 

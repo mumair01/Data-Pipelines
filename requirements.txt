@@ -1,0 +1,15 @@
+audiofile==1.1.0
+librosa==0.9.1
+matplotlib==3.5.2
+numpy==1.21.6
+pandas==1.4.2
+pydub==0.25.1
+pytest==7.1.2
+requests==2.27.1
+scikit_learn==1.1.1
+setuptools==63.1.0
+tensorflow==2.8.0
+tensorflow_datasets==4.5.2
+torch==1.11.0
+tqdm==4.64.0
+transformers==4.18.0
