@@ -2,138 +2,84 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-12 15:54:44
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-13 09:30:28
+# @Last Modified time: 2022-07-18 16:54:49
 
-##############################
-# Utils for parsing the maptask corpus specifically
-##############################
+"""
+Utils for parsing the maptask corpus specifically
+"""
 
 import os
 import sys
 import xml
+import glob
+from typing import List, Dict, Tuple
 
-################################# GLOBALS ####################################
-
-
-# Paths within the maptask corpus
-RELATIVE_TIMED_UNIT_PATHS = "Data/timed-units"
-RELATIVE_POS_PATH = "Data/pos"
-
-# Parts of speech tags present in the corpus.
-POS_TAGS = [
-    "vb",
-    "vbd",
-    "vbg",
-    "vbn",
-    "vbz",
-    "nn",
-    "nns",
-    "np",
-    "jj",
-    "jjr",
-    "jjt",
-    "ql",
-    "qldt",
-    "qlp",
-    "rb",
-    "rbr",
-    "wql",
-    "wrb",
-    "not",
-    "to",
-    "be",
-    "bem",
-    "ber",
-    "bez",
-    "do",
-    "doz",
-    "hv",
-    "hvz",
-    "md",
-    "dpr",
-    "at",
-    "dt",
-    "ppg",
-    "wdt",
-    "ap",
-    "cd",
-    "od",
-    "gen",
-    "ex",
-    "pd",
-    "wps",
-    "wpo",
-    "pps",
-    "ppss",
-    "ppo",
-    "ppl",
-    "ppg2\"",
-    "pr",
-    "pn",
-    "in",
-    "rp",
-    "cc",
-    "cs",
-    "aff",
-    "fp",
-    "noi",
-    "pau",
-    "frag",
-    "sent"
-]
+from src.datasets.maptask.constants import (
+    POS_TAGS, RELATIVE_POS_DIR, RELATIVE_TIMED_UNITS_DIR
+)
 
 
-################################# GLOBALS ####################################
-
-
-def get_maptask_file_participant(maptask_file_path):
+def get_maptask_file_participant(maptask_file_path : str) -> str:
     """Parse the participant from file path based on maptask naming convention"""
     return os.path.splitext(os.path.basename(maptask_file_path))[0].split(".")[1]
 
-def get_maptask_file_dialogue(maptask_file_path):
+def get_maptask_file_dialogue(maptask_file_path : str) -> str:
     """Parse the dialogue from file path based on maptask naming convention"""
     return os.path.splitext(os.path.basename(maptask_file_path))[0].split(".")[0]
 
-def get_maptask_file(dir_path, dialogue_name, participant, ext):
-    """
-    Get the path to a file with given participant and dialogue from a maptask
-    directory that follows the maptask naming convention.
-    """
+def get_maptask_file(dir_path : str, dialogue_name : str,
+        participant : str, ext : str) -> str:
+    """Get the path to a file with given participant and dialogue from a maptask
+    directory that follows the maptask naming convention"""
     data_paths = [p for p in os.listdir(dir_path)]
-    data_paths = [os.path.join(dir_path,p) for p in data_paths if os.path.splitext(p)[1][1:] == ext]
+    data_paths = [os.path.join(dir_path,p) for p in data_paths\
+        if os.path.splitext(p)[1][1:] == ext]
     for path in data_paths:
-       if get_maptask_file_dialogue(path) == dialogue_name and \
+        if get_maptask_file_dialogue(path) == dialogue_name and \
                 get_maptask_file_participant(path) == participant:
             return path
+    raise Exception((f'ERROR: Maptask dialogue {dialogue_name}, '
+                f'participant: {participant} not found in {dir_path}'))
 
-def get_utterance_times(maptask_root_path, dialogue, participant):
-    """
-    Obtain the start and end time for every utterance.
-    Note that the utterance is defined as when there is any voice activity.
-    The times are returned in seconds
-    """
-    timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNIT_PATHS)
+def get_dialogues(maptask_root_path : str) -> List[str]:
+    """Get the names of all the dialogues in the corpus"""
+    timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNITS_DIR)
+    assert os.path.isdir(timed_unit_dir)
+    timed_unit_paths = glob.glob("{}/*.xml".format(timed_unit_dir))
+    return set([get_maptask_file_dialogue(path) for path in timed_unit_paths])
+
+def get_utterances(maptask_root_path : str, dialogue : str,
+        participant : str) -> List[Dict]:
+    """Obtain the utterances in the corpus along with their start and end time"""
+    timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNITS_DIR)
     timed_unit_path = get_maptask_file(
-        timed_unit_dir,dialogue,participant,"xml")[0]
+        timed_unit_dir,dialogue,participant,"xml")
     # Read the xml file
     tree = xml.etree.ElementTree.parse(timed_unit_path).getroot()
     # Extracting the audio end time from te timed units file.
     tu_tags = tree.findall('tu')
-    va_times = []
+    utterances = []
     for tu_tag in tu_tags:
         start_time_s = float(tu_tag.get('start'))
         end_time_s = float(tu_tag.get('end'))
-        va_times.append((start_time_s,end_time_s))
-    return va_times
+        word = str(tu_tag.text)
+        utterances.append({
+            "start" : start_time_s,
+            "end" : end_time_s,
+            "text" : word
+        })
+    return utterances
 
-
-def get_utterance_pos_annotations(maptask_root_path, dialogue, participant):
+def get_utterance_pos_annotations(maptask_root_path : str, dialogue : str,
+        participant : str) -> Tuple:
     """
     Obtain the parts of speech annotations for all utterances where there
     is any voice activity.
+    Returns:
+        (Tuple): utterance end time, part of speech tag
     """
-    timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNIT_PATHS)
-    pos_dir = os.path.join(maptask_root_path,RELATIVE_POS_PATH)
+    timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNITS_DIR)
+    pos_dir = os.path.join(maptask_root_path,RELATIVE_POS_DIR)
     timed_unit_path = get_maptask_file(
         timed_unit_dir,dialogue,participant,"xml")[0]
     tree_timed_unit = xml.etree.ElementTree.parse(timed_unit_path).getroot()

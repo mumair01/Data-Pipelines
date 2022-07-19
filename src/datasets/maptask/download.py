@@ -2,31 +2,52 @@
 # @Author: Muhammad Umair
 # @Date:   2022-05-17 15:17:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-14 16:47:57
+# @Last Modified time: 2022-07-18 16:13:35
 
 import argparse
+from cgitb import reset
+from dataclasses import dataclass
+from re import L
 import tqdm
 import glob
 import shutil
 import subprocess
 import os
 from src.datasets.utils import download_from_url, download_zip_from_url,\
-                                extract_from_zip, stereo_to_mono
+                                extract_from_zip, stereo_to_mono,reset_dir
 
 # ---------------------------------- GLOBALS -----------------------------------
 
-class MapTaskDownloader:
+@dataclass
+class DownloadPaths:
+    """
+    Stores the download paths of the maptask corpus
+    """
+    annotations_path : str
+    stereo_path : str
+    mono_path : str
 
-    DOWNLOAD_DIR = "."
-    ANNOTATIONS_DOWNLOAD_DIR = os.path.join(DOWNLOAD_DIR,"annotations")
-    STEREO_AUDIO_DIR = os.path.join(DOWNLOAD_DIR,"signals","dialogues")
-    MONO_AUDIO_DIR = os.path.join(DOWNLOAD_DIR,"signals","mono_dialogues")
-    TEMP_DIR = os.path.join(DOWNLOAD_DIR,"temp")
+
+class MapTaskDownloader:
+    """
+    Utility for downloading both the annotations and dialogues for the maptask
+    corpus
+    """
 
     ANNOTATIONS_URL = "http://groups.inf.ed.ac.uk/maptask/hcrcmaptask.nxtformatv2-1.zip"
     STEREO_AUDIO_URL = "https://groups.inf.ed.ac.uk/maptask/signals/dialogues/"
+    MAPTASK_VERSION = "maptaskv2-1"
 
-    STEREO_AUDIO_FILENAMES = [
+    _DOWNLOAD_DIR = "."
+    _ANNOTATIONS_DOWNLOAD_DIR = os.path.join(_DOWNLOAD_DIR,"annotations")
+    _STEREO_OUTPUT_DIR = os.path.join(_DOWNLOAD_DIR,"signals","dialogues")
+    _MONO_OUTPUT_DIR = os.path.join(_DOWNLOAD_DIR,"signals","monologues")
+    # Temp dirs.
+    _TEMP_DIR = os.path.join(_DOWNLOAD_DIR,"temp")
+    _STEREO_TEMP_DIR = os.path.join(_TEMP_DIR,"signals","dialogues")
+    _MONO_TEMP_DIR = os.path.join(_TEMP_DIR,"signals","monologues")
+
+    _STEREO_AUDIO_FILENAMES = [
         "q1ec1.mix.wav",
         "q1ec2.mix.wav",
         "q1ec3.mix.wav",
@@ -157,62 +178,80 @@ class MapTaskDownloader:
         "q8nc8.mix.wav",
     ]
 
-
-    def __init__(self, output_dir : str):
+    def __init__(self, output_dir : str, force_download : bool = False):
+        """
+        Args:
+            output_dir (str):
+                Directory containing the corpus. If output_dir already exists, it
+                is assumed that it is a cached copy.
+            force_download (bool):
+                Set True to re-download even if output_dir exists.
+        """
         # Create the dirs
-        self.download_dir = os.path.join(output_dir,self.DOWNLOAD_DIR)
-        self.temp_dir = os.path.join(output_dir,self.TEMP_DIR)
+        self.download_dir = os.path.join(output_dir,self._DOWNLOAD_DIR)
+        self.temp_dir = os.path.join(output_dir,self._TEMP_DIR)
+        # Output directories
+        self.annotations_dir = os.path.join(
+            self.download_dir,self._ANNOTATIONS_DOWNLOAD_DIR)
+        self.stereo_dialogues_dir = os.path.join(
+            self.download_dir,self._STEREO_OUTPUT_DIR)
+        self.mono_dialogues_dir = os.path.join(
+            self.download_dir,self._MONO_OUTPUT_DIR)
+        # Assumes that if the output dir exists, it must be the corpus and
+        # verifies integrity.
+        if os.path.isdir(self.download_dir):
+            if not self.__verify() and not force_download:
+                raise Exception(f'ERROR: Integrity could not be verified {output_dir}')
+            if force_download:
+                for dir in (self.annotations_dir,self.stereo_dialogues_dir,self.mono_dialogues_dir):
+                    if os.path.isdir(dir):
+                        shutil.rmtree(dir)
+        self.cached = os.path.isdir(self.download_dir) and not force_download
 
     def __call__(self):
-        annotations_path = self.download_annotations()
-        stereo_output_path, mono_output_path = \
-            self.download_signals(extract_mono=True)
-        return (annotations_path, stereo_output_path, mono_output_path)
+        """
+        Downloads the annotations and signals and returns paths
+        to annotations, stereo, and mono dialogues.
+        """
+        if not self.cached:
+            self.__download_annotations()
+            self.__download_signals(extract_mono=True)
+        return DownloadPaths(
+            os.path.join(self.annotations_dir,self.MAPTASK_VERSION),
+            self.stereo_dialogues_dir, self.mono_dialogues_dir)
 
+    def __download_annotations(self):
+        os.makedirs(self.annotations_dir,exist_ok=True)
+        download_zip_from_url(self.ANNOTATIONS_URL,self.annotations_dir)
 
-    def download_annotations(self):
-        download_path = os.path.join(
-            self.download_dir,self.ANNOTATIONS_DOWNLOAD_DIR)
-        os.makedirs(download_path)
-        download_zip_from_url(self.ANNOTATIONS_URL,download_path)
-        return download_path
-
-    def download_signals(self,extract_mono=True):
-        if os.path.isdir(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
-        os.makedirs(self.temp_dir)
-        stereo_temp_path = os.path.join(self.temp_dir, self.STEREO_AUDIO_DIR)
-        mono_temp_path = os.path.join(self.temp_dir,self.MONO_AUDIO_DIR)
-        stereo_output_path = os.path.join(self.download_dir,self.STEREO_AUDIO_DIR)
-        mono_output_path = os.path.join(self.download_dir,self.MONO_AUDIO_DIR) if extract_mono else None
-        os.makedirs(stereo_temp_path)
-        os.makedirs(mono_temp_path)
+    def __download_signals(self,extract_mono=True):
+        # Reset dirs.
+        stereo_temp_path = os.path.join(self.temp_dir, self._STEREO_TEMP_DIR)
+        mono_temp_path = os.path.join(self.temp_dir,self._MONO_TEMP_DIR)
+        for dir in (self.temp_dir,stereo_temp_path, mono_temp_path):
+            reset_dir(dir)
         # Download each file individually.
-        for audiofile in self.STEREO_AUDIO_FILENAMES:
-            url = os.path.join(self.STEREO_AUDIO_URL,audiofile)
+        for audiofile in self._STEREO_AUDIO_FILENAMES:
+            url = os.path.join(self.STEREO_AUDIO_URL, audiofile)
             download_from_url(url,"{}/{}".format(stereo_temp_path,audiofile))
-            # Copy all the downloaded files from dir and move to output dir
         stereo_paths = glob.glob("{}/*".format(stereo_temp_path))
+        # Extract mono audios.
         if extract_mono:
             for stereo_path in stereo_paths:
-                stereo_to_mono(stereo_path,mono_temp_path,
-                                    left_prefix="g",right_prefix="f")
-            shutil.move(mono_temp_path,mono_output_path)
-        shutil.move(stereo_temp_path,stereo_output_path)
+                stereo_to_mono(stereo_path,mono_temp_path,left_prefix="g",
+                                    right_prefix="f")
+            shutil.move(mono_temp_path,self.mono_dialogues_dir)
+        shutil.move(stereo_temp_path,self.stereo_dialogues_dir)
         shutil.rmtree(self.temp_dir)
-        return stereo_output_path, mono_output_path
 
-
-def test_download():
-    """
-    Pytest test for sample downloading -- only runs if script ran with pytest.
-    """
-    out_dir = "./maptask_test_download"
-    os.makedirs(out_dir,exist_ok=True)
-    loader = MapTaskDownloader(out_dir)
-    path = loader.download_annotations()
-    print(path)
-    stereo_path, mono_path = loader.download_signals()
-    print(stereo_path,mono_path)
-
-
+    def __verify(self) -> bool:
+        """
+        Verify that the downloaded annotations and signals directories
+        are complete.
+        """
+        # Check that the annotations dir exists.
+        return os.path.isdir(self.annotations_dir) and \
+            os.path.isdir(self.stereo_dialogues_dir) and \
+            os.path.isdir(self.mono_dialogues_dir) and \
+            len(os.listdir(self.mono_dialogues_dir)) == 2 \
+                    * len(os.listdir(self.stereo_dialogues_dir))
