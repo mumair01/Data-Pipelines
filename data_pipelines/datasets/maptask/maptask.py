@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 12:59:19
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 09:15:46
+# @Last Modified time: 2022-07-19 11:16:44
 
 import sys
 import os
@@ -14,8 +14,8 @@ from sklearn.model_selection import train_test_split
 import datasets
 from datasets import Value, Audio
 
-from src.datasets.maptask.download import MapTaskDownloader, DownloadPaths
-from src.datasets.maptask.utils import (
+from data_pipelines.datasets.maptask.download import MapTaskDownloader, DownloadPaths
+from data_pipelines.datasets.maptask.utils import (
     get_dialogues,
     get_maptask_file,
     get_utterances,
