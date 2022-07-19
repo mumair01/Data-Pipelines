@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 12:59:19
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 12:55:58
+# @Last Modified time: 2022-07-19 13:02:41
 
 import sys
 import os
@@ -205,8 +205,11 @@ class MapTask(datasets.GeneratorBasedBuilder):
 
     def __extract_egemaps(self,audio_path):
         signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
-        smile = OpenSmile(feature_set="egemapsv02_50ms",
-                            feature_level="lld",sample_rate=sampling_rate)
+        smile = OpenSmile(
+            feature_set="egemapsv02_50ms",
+            feature_level="lld",
+            sample_rate=sampling_rate,
+            normalize=False)
         f = smile(signal)
         return {
             "values" : f,
