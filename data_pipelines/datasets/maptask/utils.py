@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-12 15:54:44
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 11:16:47
+# @Last Modified time: 2022-07-19 11:51:58
 
 """
 Utils for parsing the maptask corpus specifically
@@ -71,26 +71,26 @@ def get_utterances(maptask_root_path : str, dialogue : str,
     return utterances
 
 def get_utterance_pos_annotations(maptask_root_path : str, dialogue : str,
-        participant : str) -> Tuple:
+        participant : str) -> Dict:
     """
     Obtain the parts of speech annotations for all utterances where there
     is any voice activity.
     Returns:
-        (Tuple): utterance end time, part of speech tag
+        (Dict: Map from utterance end time to part of speech tag
     """
     timed_unit_dir = os.path.join(maptask_root_path,RELATIVE_TIMED_UNITS_DIR)
     pos_dir = os.path.join(maptask_root_path,RELATIVE_POS_DIR)
     timed_unit_path = get_maptask_file(
-        timed_unit_dir,dialogue,participant,"xml")[0]
+        timed_unit_dir,dialogue,participant,"xml")
     tree_timed_unit = xml.etree.ElementTree.parse(timed_unit_path).getroot()
     tu_tags = tree_timed_unit.findall("tu")
     pos_path = timed_unit_path = get_maptask_file(
-        pos_dir,dialogue,participant,"xml")[0]
+        pos_dir,dialogue,participant,"xml")
     tree_pos = xml.etree.ElementTree.parse(pos_path).getroot()
     # The pos is the tag attribute in all the tw tags.
     tw_tags = tree_pos.findall("tw")
     # Collecting the end time of the word and the corresponding POS tag.
-    word_annotations = []
+    word_annotations = {}
     for tu_tag in tu_tags:
         tu_tag_id = tu_tag.get("id")[7:]
         end_time_s = float(tu_tag.get('end'))
@@ -105,6 +105,5 @@ def get_utterance_pos_annotations(maptask_root_path : str, dialogue : str,
                 href_id = href_id[href_id.find("(")+8:href_id.rfind(")")]
                 if href_id == tu_tag_id:
                     if tw_tag.get("tag") in POS_TAGS:
-                        word_annotations.append((end_time_s,tw_tag.get("tag")))
+                        word_annotations[end_time_s] = tw_tag.get("tag")
     return word_annotations
-

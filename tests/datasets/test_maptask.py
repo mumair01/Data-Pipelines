@@ -2,25 +2,15 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 13:20:45
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-18 17:21:25
-
-
-
+# @Last Modified time: 2022-07-19 12:52:46
 
 import pytest
 from datasets import load_dataset
 
-
-from src.datasets.maptask import load_maptask
+from data_pipelines.datasets.maptask import load_maptask
 
 
 def test_maptask():
-    dataset = load_maptask()
+    dataset = load_maptask(variant="audio")
     print(dataset)
-    for item in dataset['train']:
-        print(item['dialogue'])
-        print(item['participant'])
-        print(item['audio_paths'])
-        for utt in item['utterances']:
-            print(utt)
-        break
+    print(dataset['train'][0])

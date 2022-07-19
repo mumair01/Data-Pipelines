@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-07 16:44:55
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-11 16:48:45
+# @Last Modified time: 2022-07-19 12:26:35
 
 
 import os
@@ -17,20 +17,28 @@ import glob
 
 import torch
 
-from src.features.utils import z_norm, z_norm_non_zero
+from data_pipelines.utils import get_module_path
+from data_pipelines.features.utils import z_norm, z_norm_non_zero
+
+
+_EGEMAPS_V02_50MS_CONF = os.path.join(
+    get_module_path(),"configs/opensmile/pyopensmile/egemaps_v02_custom/egemaps_v02_50ms/eGeMAPSv02.conf")
 
 
 class OpenSmile:
 
-    FEATURE_SETS = ["egemapsv02",]
-    SMILE_EXTRACT_CMD = "SMILExtract -C {} -I {} -D {}"
+    _FEATURE_SETS = ["egemapsv02_default", "egemapsv02_50ms"]
 
-    def __init__(self, feature_set="egemapsv02",
+    _SMILE_EXTRACT_CMD = "SMILExtract -C {} -I {} -D {}"
+
+    def __init__(self, feature_set="egemapsv02_default",
             feature_level="lld",
-            sample_rate=16_000, normalize=False):
+            sample_rate=16_000, normalize=False,
+            use_smile=False,):
         self.feature_set = feature_set
         self.sample_rate = sample_rate
         self.normalize = normalize
+        self.use_smile = use_smile
         feature_set = self.get_feature_set(feature_set)
         self.smile = opensmile.Smile(
             feature_set=feature_set,
@@ -50,7 +58,8 @@ class OpenSmile:
         return self.smile.feature_names
 
     def _settings(self):
-        if self.feature_set_name == "egemapsv02":
+        if self.feature_set_name == "egemapsv02_default" or \
+                self.feature_set_name == "egemapsv02_50ms":
             self.pad_samples = int(self.sample_rate * 0.02)
             self.pad_frames = 2
             self.f0_idx = 10
@@ -58,7 +67,6 @@ class OpenSmile:
             self.idx_reg = list(range(25))
             for ii in self.idx_special:
                 self.idx_reg.pop(self.idx_reg.index(ii))
-
         elif self.feature_set_name == "emobase":
             self.pad_samples = int(self.sample_rate * 0.01)
             self.pad_frames = 1
@@ -71,18 +79,16 @@ class OpenSmile:
             raise NotImplementedError()
 
     def get_feature_set(self, feature_set):
-        # Read the conf if the feature level is a file
-        if os.path.isfile(feature_set) and \
-                os.path.splitext(os.path.basename(feature_set))[1] == ".conf":
-            return feature_set
-        # Otherwise, check given sets.
         feature_set = feature_set.lower()
         assert (
-            feature_set in self.FEATURE_SETS
-        ), f"{feature_set} not found. Try {self.FEATURE_SETS}"
+            feature_set in self._FEATURE_SETS
+        ), f"{feature_set} not found. Try {self._FEATURE_SETS}"
 
-        if feature_set == "egemapsv02":
+        if feature_set == "egemapsv02_default":
             return opensmile.FeatureSet.eGeMAPSv02
+        elif feature_set == "egemapsv02_50ms":
+            assert os.path.isfile(_EGEMAPS_V02_50MS_CONF)
+            return _EGEMAPS_V02_50MS_CONF
         elif feature_set == "emobase":
             return opensmile.FeatureSet.emobase
         else:
@@ -92,8 +98,9 @@ class OpenSmile:
         return str(self.smile)
 
     def __call__(self, waveform):
-        if self.use_smile_extract:
-            pass
+        if self.use_smile:
+            # TODO: Implement this at some point for compatibility.
+            raise NotImplementedError()
         else:
             data =self.smile.process_signal(waveform, self.sample_rate)
             f = torch.from_numpy(
