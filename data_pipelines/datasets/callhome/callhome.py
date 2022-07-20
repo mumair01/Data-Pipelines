@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 16:43:55
+# @Last Modified time: 2022-07-20 11:56:44
 
 import sys
 import os
@@ -18,7 +18,7 @@ from data_pipelines.datasets.utils import (
     get_train_val_test_splits, extract_feature_set
 )
 from data_pipelines.datasets.callhome.utils import (
-    get_utterances
+    get_utterances, get_audio_path
 )
 
 _CALLHOME_HOMEPAGE = ""
@@ -28,12 +28,17 @@ _CALLHOME_CITATION = ""
 _DEFAULT_FEATURES = {
     "id" : Value('string'),
     "utterances" : [{
+            "speaker" : Value("string"),
             "start" : Value("float"),
             "end" : Value("float"),
             "text" : Value("string"),
         }
     ],
+}
 
+_AUDIO_FEATURES = {
+    "id" : Value('string'),
+    "path" : Value("string"),
 }
 
 _TEST_SPLIT_SIZE = 0.25
@@ -60,6 +65,13 @@ class CallHome(datasets.GeneratorBasedBuilder):
             test_size=_TEST_SPLIT_SIZE,
             val_size=_VAL_SPLIT_SIZE,
             seed=_GLOBAL_SEED
+        ),
+         CallHomeConfig(
+            name="audio",
+            language='eng',
+            test_size=_TEST_SPLIT_SIZE,
+            val_size=_VAL_SPLIT_SIZE,
+            seed=_GLOBAL_SEED
         )
     ]
 
@@ -70,7 +82,8 @@ class CallHome(datasets.GeneratorBasedBuilder):
             description=_CALLHOME_DESCRIPTION,
             citation=_CALLHOME_CITATION ,
             homepage=_CALLHOME_HOMEPAGE,
-            features=datasets.Features(_DEFAULT_FEATURES)
+            features=datasets.Features(_DEFAULT_FEATURES \
+                if self.config.name == 'default' else _AUDIO_FEATURES)
         )
 
     def _split_generators(self, dl_manager : datasets.DownloadManager):
@@ -92,6 +105,7 @@ class CallHome(datasets.GeneratorBasedBuilder):
         train, val, test = get_train_val_test_splits(
             conversations,self.config.test_size, self.config.val_size,self.
             config.seed)
+
         splits = {}
         for split, dialogues in zip(
                 ('train','validation','test'), (train, val,test)):
@@ -115,14 +129,25 @@ class CallHome(datasets.GeneratorBasedBuilder):
         with open(filepath,'r') as f:
             conversations = [d.rstrip("\n") for d in f.readlines()]
             for conversation in conversations:
-                # Get the utterances
-                utterances = get_utterances(
-                    self.download_paths.transcriptions_dir,conversation)
-                yield f"{conversation}",{
-                    "id" : conversation,
-                    "utterances" : utterances
-                }
+                if self.config.name == "default":
+                    # Get the utterances
+                    utterances = get_utterances(
+                        self.download_paths.transcriptions_dir,conversation)
+                    yield f"{conversation}",{
+                        "id" : conversation,
+                        "utterances" : utterances
+                    }
+                elif self.config.name == "audio":
+                    path = get_audio_path(
+                        self.download_paths.media_dir,conversation)
+                    if not os.path.isfile(path):
+                        continue
+                    yield f"{conversation}",{
+                        "id" : conversation,
+                        "path" : path,
+                    }
 
 
-    ############################## HELPER METHODS ############################
+
+
 

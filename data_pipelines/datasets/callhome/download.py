@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:39:35
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 16:30:15
+# @Last Modified time: 2022-07-20 11:52:59
 
 import os
 import sys
@@ -42,7 +42,7 @@ class CallHomeDownloader:
         # Creating the directories.
         self.download_dir = os.path.join(output_dir,self._DOWNLOAD_DIR)
         self.trans_dir = os.path.join(
-            self.download_dir,self._BASE_TRANS_DOWNLOAD_DIR)
+            self.download_dir,self._BASE_TRANS_DOWNLOAD_DIR,language)
         self.media_dir = os.path.join(
             self.download_dir,self._BASE_MEDIA_DOWNLOAD_DIR,language)
         # Creating the urls
@@ -62,7 +62,6 @@ class CallHomeDownloader:
 
     def __download_transcripts(self):
         reset_dir(self.trans_dir)
-        print(self.trans_url)
         download_zip_from_url(self.trans_url,self.trans_dir)
 
     def __download_media(self):
@@ -77,4 +76,3 @@ class CallHomeDownloader:
         for file in filenames:
             url = "{}/{}".format(self.media_url,file)
             download_from_url(url,"{}/{}".format(self.media_dir,file))
-            break
