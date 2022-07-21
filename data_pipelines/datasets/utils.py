@@ -2,9 +2,10 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 16:19:30
+# @Last Modified time: 2022-07-21 15:48:00
 
 import os
+import sys
 import requests
 from tqdm import tqdm
 from pathlib import Path
@@ -13,7 +14,20 @@ from zipfile import ZipFile
 import shutil
 import audiofile
 from sklearn.model_selection import train_test_split
+import json
+import subprocess
+
 from data_pipelines.features.opensmile import OpenSmile
+from data_pipelines.utils import get_module_path
+
+############################# GLOBALS #####################################
+
+if sys.platform == "darwin":
+    # NOTE: This is the MAC OSX compiled binary for shp2pipe
+    SPH2PIPE_EXE_PATH = os.path.join(get_module_path(), "bin","sph2pipe_osx")
+elif sys.platform == "linux":
+    SPH2PIPE_EXE_PATH = os.path.join(get_module_path(), "bin","sph2pipe")
+
 
 ############################# GENERAL UTILS ################################
 
@@ -21,6 +35,28 @@ def reset_dir(dir_path):
     if os.path.isdir(dir_path):
         shutil.rmtree(dir_path)
     os.makedirs(dir_path)
+
+def write_json(data, filename):
+    with open(filename, "w", encoding="utf-8") as jsonfile:
+        json.dump(data, jsonfile, ensure_ascii=False)
+
+
+def read_json(path, encoding="utf8"):
+    with open(path, "r", encoding=encoding) as f:
+        data = json.loads(f.read())
+    return data
+
+def write_txt(txt, name):
+    with open(name, "w") as f:
+        f.write("\n".join(txt))
+
+
+def read_txt(path, encoding="utf-8"):
+    data = []
+    with open(path, "r", encoding=encoding) as f:
+        for line in f.readlines():
+            data.append(line.strip())
+    return data
 
 ############################# DOWNLOAD UTILS ################################
 
@@ -88,6 +124,31 @@ def extract_feature_set(audio_path, feature_set):
         "features" : list(smile.idx2feat.values())
     }
 
+
+# TODO: Add the other sph2pipe flags.
+def sph2pipe(infile, outdir=None,outfile_suffix="", c=None):
+    """Python wrapper for sph2pipe tool"""
+    assert os.path.isfile(infile)
+    # Generate the outfile path
+    if outdir == None:
+        outfile = infile.replace(".sph",f".wav")
+    else:
+        assert os.path.isdir(outdir)
+        outfile = os.path.join(
+            outdir, os.path.basename(infile).replace(".sph",f".wav"))
+    # Add the outfile suffix
+    name, ext = os.path.splitext(os.path.basename(outfile))
+    outfile = os.path.join(os.path.dirname(outfile),f"{name}{outfile_suffix}.{ext[1:]}")
+    # Does not process if the outfile exists
+    if not os.path.isfile(outfile):
+        # Construct the arguments
+        args = [SPH2PIPE_EXE_PATH]
+        if c != None:
+            args.extend(["-c", str(c)])
+        args.extend([infile,outfile])
+        # Call the process
+        subprocess.check_call(args)
+    return outfile
 
 ######################## DATASET UTILS ##########################
 
