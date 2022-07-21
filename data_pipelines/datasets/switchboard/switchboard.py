@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-20 19:19:33
+# @Last Modified time: 2022-07-21 15:38:46
 
 import sys
 import os
@@ -12,9 +12,8 @@ from dataclasses import dataclass
 import datasets
 from datasets import Value, Audio, Array3D
 
-from data_pipelines.datasets.switchboard.isip import (
-    ISIPAlignedCorpusReader
-)
+from data_pipelines.datasets.switchboard.isip import ISIPAlignedCorpusReader
+from data_pipelines.datasets.switchboard.ldc import LDCAudioCorpusReader
 from data_pipelines.datasets.utils import (
     get_train_val_test_splits, extract_feature_set
 )
@@ -90,6 +89,29 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             val_size=_VAL_SPLIT_SIZE,
             seed=_GLOBAL_SEED
         ),
+        # NOTE: The ldc-audio requires the unzipped data directory path for now.
+        SwitchboardConfig(
+            name="ldc-audio",
+            homepage=_LDC_HOMEPAGE,
+            description=_LDC_DESCRIPTION,
+            citation=_LDC_CITATION,
+            data_url="",
+            features={
+                "session" : Value('string'),
+                "participant" : Value('string'),
+                "audio_paths" : {
+                    "stereo" : Value('string'),
+                    "mono" : Value('string')
+                },
+                "egemaps" : {
+                    "values" : Array3D(shape=(1,-1,25),dtype='float64'),
+                    "features" : [Value("string")]
+                },
+            },
+            test_size=_TEST_SPLIT_SIZE,
+            val_size=_VAL_SPLIT_SIZE,
+            seed=_GLOBAL_SEED
+        )
     ]
 
     ############################ Overridden Methods ##########################
@@ -103,11 +125,14 @@ class Switchboard(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager : datasets.DownloadManager):
-        # Download the corpus
-        extracted_path = dl_manager.download_and_extract(self.config.data_url)
+        # Initialize the specific type of corpus.
         # Select the reader
         if self.config.name == "isip-aligned":
+            extracted_path = dl_manager.download_and_extract(self.config.data_url)
             self.reader = ISIPAlignedCorpusReader(extracted_path)
+        elif self.config.name == "ldc-audio":
+            extracted_path = self.config.data_dir
+            self.reader = LDCAudioCorpusReader(extracted_path)
         else:
             raise NotImplementedError()
         # Generate the data splits
@@ -141,12 +166,28 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             sessions = [d.rstrip("\n") for d in f.readlines()]
             for session in sessions:
                 for participant in self.reader.PARTICIPANTS:
-                    conv = self.reader.get_session_transcript(
-                        session,participant)
-                    yield f"{session}_{participant}", {
-                        "session" : session,
-                        "participant" : participant,
-                        "turns" : conv
-                    }
+                    if self.config.name == "isip-aligned":
+                        conv = self.reader.get_session_transcript(
+                            session,participant)
+                        yield f"{session}_{participant}", {
+                            "session" : session,
+                            "participant" : participant,
+                            "turns" : conv
+                        }
+                    elif self.config.name == "ldc-audio":
+                        mono_path = self.reader.mono_paths[session][participant]
+                        # Extract egemaps
+                        egemaps = extract_feature_set(mono_path,'egemapsv02_50ms')
+                        yield f"{session}_{participant}",{
+                            "session" : session,
+                            "participant" : participant,
+                            "audio_paths" : {
+                                "stereo" : self.reader.wav_paths[session],
+                                "mono" : mono_path
+                            },
+                            "egemaps" : egemaps
+                        }
+                    else:
+                        raise NotImplementedError()
 
 
