@@ -2,12 +2,13 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:57:04
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-20 19:18:51
+# @Last Modified time: 2022-07-25 16:03:27
 
 """
 Utils / parsers for the  isip aligned switchboard transcripts
 HOMEPAGE = https://isip.piconepress.com/projects/switchboard/
 Keywords: Manually corrected work alignments
+NOTE: These are the same as the MSU transcripts found here: https://www.openslr.org/5/
 """
 
 import os
