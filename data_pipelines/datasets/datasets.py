@@ -2,9 +2,11 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:45:40
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 16:06:05
+# @Last Modified time: 2022-07-26 17:22:18
 
 import os
+import glob
+import shutil
 
 from data_pipelines.datasets.callfriend import load_callfriend
 from data_pipelines.datasets.callhome import load_callhome
@@ -41,5 +43,4 @@ def clear_downloads():
     """Remove all the downloads from the cache"""
     reset_dir(_DOWNLOADS_DIR)
 
-def clear_cache():
-    reset_dir(_CACHE_DIR)
+
