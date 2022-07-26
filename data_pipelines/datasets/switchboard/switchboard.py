@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:16:29
+# @Last Modified time: 2022-07-26 15:22:19
 
 import sys
 import os
@@ -16,9 +16,7 @@ from data_pipelines.datasets.switchboard.readers import (
     ISIPAlignedCorpusReader,
     LDCAudioCorpusReader
 )
-from data_pipelines.datasets.utils import (
-    get_train_val_test_splits, extract_feature_set
-)
+
 
 _LDC_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC97S62"
 _LDC_DESCRIPTION = """\

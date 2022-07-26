@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:54:27
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:12:27
+# @Last Modified time: 2022-07-26 15:21:36
 
 import pytest
 from datasets import load_dataset
@@ -34,7 +34,8 @@ def test_switchboard():
     # load_switchboard(variant="isip-aligned")
     # load_switchboard(variant="swda")
 
-    load_data(
+    dataset = load_data(
         dataset="switchboard",
-        variant="default"
+        variant="isip-aligned"
     )
+    print(dataset)

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:50:11
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:11:48
+# @Last Modified time: 2022-07-26 15:20:43
 
 
 import pytest
@@ -17,5 +17,5 @@ def test_callhome():
         language="eng"
     )
     # dataset = load_callfriend(variant="default")
-    print(dataset['all'][0])
+    print(dataset['full'][0])
 

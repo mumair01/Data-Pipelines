@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:16:53
+# @Last Modified time: 2022-07-26 15:22:55
 
 import sys
 import os
@@ -12,7 +12,7 @@ import datasets
 from datasets import Value, Audio, Array3D
 
 from data_pipelines.datasets.callhome.download import (
-    CallHomeDownloader, DownloadPaths
+    CallHomeDownloader
 )
 
 from data_pipelines.datasets.callhome.utils import (
