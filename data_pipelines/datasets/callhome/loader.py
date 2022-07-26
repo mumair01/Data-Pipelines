@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 11:49:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 16:44:08
+# @Last Modified time: 2022-07-26 14:15:21
 
 
 import os
@@ -11,15 +11,29 @@ from datasets import load_dataset
 
 from data_pipelines.utils import get_module_path
 
-DATASET_LOADING_SCRIPT = os.path.join(
+_DATASET_LOADING_SCRIPT = os.path.join(
     get_module_path(), "datasets","callhome","callhome.py")
 
-def load_callhome(variant="default",language="eng",force_redownload=False):
-    kwargs = {
+_VARIANTS = ('default', "audio")
+_LANGUAGES = 'ara','deu','eng','jpn','spa','zho'
+
+def load_callhome(variant="default",language="eng",**kwargs):
+    """
+    Obtain the Callhome corpus with of the specified variant and language.
+    NOTE: Accepts all huggingface load_dataset kwargs: https://huggingface.co/docs/datasets/package_reference/loading_methods
+    Args:
+        variant (str): Flavor of the dataset to load. One of: "default", "audio"
+        language (str):  Callfriend corpus language.
+            One of:  'ara','deu','eng','jpn','spa','zho'
+    """
+    assert language in _LANGUAGES, \
+        f"Language must be one of: {_LANGUAGES}"
+    assert variant in _VARIANTS, \
+        f"Variant must be one of: {_VARIANTS}"
+
+    kwargs.update({
         "name" : variant,
-        "language" : language,
-        "download_mode" : "reuse_dataset_if_exists" \
-            if not force_redownload else "force_redownload"
-    }
-    dataset = load_dataset(DATASET_LOADING_SCRIPT,**kwargs)
+        "language" : language
+    })
+    dataset = load_dataset(_DATASET_LOADING_SCRIPT,**kwargs)
     return dataset

@@ -2,14 +2,10 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 12:59:19
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 16:19:23
+# @Last Modified time: 2022-07-26 14:23:54
 
 import sys
 import os
-import glob
-import audiofile
-
-from sklearn.model_selection import train_test_split
 
 import datasets
 from datasets import Value, Audio, Array3D
@@ -22,7 +18,8 @@ from data_pipelines.datasets.maptask.utils import (
     get_utterance_pos_annotations,
 )
 from data_pipelines.datasets.utils import (
-    get_train_val_test_splits, extract_feature_set
+    get_train_val_test_splits,
+    # extract_feature_set
 )
 _MAPTASK_HOMEPAGE = "https://groups.inf.ed.ac.uk/maptask/"
 _MAPTASK_DESCRIPTION = "Maptask corpus custom dataset"
@@ -45,20 +42,12 @@ _DEFAULT_FEATURES = {
 _AUDIO_FEATURES = {
     "dialogue" : Value("string"),
     "participant" : Value("string"),
-    "egemaps" : {
-        "values" : Array3D(shape=(1,-1,25),dtype='float64'),
-        "features" : [Value("string")]
-    },
     "audio_paths" : {
         "stereo" : Value("string"),
         "mono" : Value("string"),
     },
 }
 
-
-_TEST_SPLIT_SIZE = 0.25
-_VAL_SPLIT_SIZE = 0.2
-_GLOBAL_SEED = 42
 
 
 class MapTaskConfig(datasets.BuilderConfig):
@@ -92,9 +81,6 @@ class MapTask(datasets.GeneratorBasedBuilder):
                     Variant of the maptask corpus containing data parsed directly
                     from the corpus.
                 """,
-            test_size=_TEST_SPLIT_SIZE,
-            val_size=_VAL_SPLIT_SIZE,
-            seed=_GLOBAL_SEED
         ),
         MapTaskConfig(
             name="audio",
@@ -102,9 +88,6 @@ class MapTask(datasets.GeneratorBasedBuilder):
                 """\
                     Variant of the maptask corpus containing various audio data.
                 """,
-            test_size=_TEST_SPLIT_SIZE,
-            val_size=_VAL_SPLIT_SIZE,
-            seed=_GLOBAL_SEED
         ),
     ]
 
@@ -132,32 +115,39 @@ class MapTask(datasets.GeneratorBasedBuilder):
         self.download_paths = downloader()
         # Generate the data splits from the dialogues
         dialogues = get_dialogues(self.download_paths.annotations_path)
-        train, val, test = get_train_val_test_splits(
-            dialogues, self.config.test_size, self.config.val_size)
-        # Save the data splits
-        tmp_path = os.path.join(dataset_dir,"splits")
-        os.makedirs(tmp_path,exist_ok=True)
-        splits = {}
-        for split, dialogues in zip(('train','validation','test'), (train, val,test)):
-            path = os.path.join(tmp_path,"{}.txt".format(split))
-            with open(path, 'w') as f:
-                f.writelines("\n".join(dialogues))
-                splits[split] = path
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath" : splits['train']}),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={"filepath" : splits['validation']}),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={"filepath" : splits['test']}),
+                name=datasets.Split.ALL,
+                gen_kwargs={"dialogues" : dialogues}),
         ]
+        # NOTE: Remove the following code block since splits are not inherently
+        # generated in the data.
+        # ------------------
+        # train, val, test = get_train_val_test_splits(
+        #     dialogues, self.config.test_size, self.config.val_size,_GLOBAL_SEED)
+        # # Save the data splits
+        # tmp_path = os.path.join(dataset_dir,"splits")
+        # os.makedirs(tmp_path,exist_ok=True)
+        # splits = {}
+        # for split, dialogues in zip(('train','validation','test'), (train, val,test)):
+        #     path = os.path.join(tmp_path,"{}.txt".format(split))
+        #     with open(path, 'w') as f:
+        #         f.writelines("\n".join(dialogues))
+        #         splits[split] = path
+        # return [
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.TRAIN,
+        #         gen_kwargs={"filepath" : splits['train']}),
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.VALIDATION,
+        #         gen_kwargs={"filepath" : splits['validation']}),
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.TEST,
+        #         gen_kwargs={"filepath" : splits['test']}),
+        # ]
+        # ------------------
 
-    def _generate_examples(self, filepath):
-        with open(filepath,'r') as f:
-            dialogues = [d.rstrip("\n") for d in f.readlines()]
+    def _generate_examples(self, dialogues):
         for dialogue in dialogues:
             for participant in self._MAPTASK_PARTICIPANTS:
                 if self.config.name == "default":
@@ -182,11 +172,11 @@ class MapTask(datasets.GeneratorBasedBuilder):
                     mono_path = get_maptask_file(
                         self.download_paths.mono_path,dialogue,participant,"wav")
                     # Get audio features
-                    egemaps = extract_feature_set(mono_path,'egemapsv02_50ms')
+                    # egemaps = extract_feature_set(mono_path,'egemapsv02_50ms')
                     yield f"{dialogue}.{participant}", {
                         "dialogue" : dialogue,
                         "participant" : participant,
-                        "egemaps" : egemaps,
+                        # "egemaps" : egemaps,
                         "audio_paths" : {
                             "stereo" : stereo_path,
                             "mono" : mono_path

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:19:12
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 16:27:04
+# @Last Modified time: 2022-07-26 14:01:41
 
 import os
 import sys
@@ -20,6 +20,7 @@ class DownloadPaths:
     media_dir : str
 
 class CallFriendDownloader:
+    """Utility class for downloading the Callfriend corpus. """
 
     BASE_TRANS_URL = "https://ca.talkbank.org/data/CallFriend/{}.zip"
     BASE_MEDIA_URL = "https://media.talkbank.org/ca/CallFriend/"
@@ -33,6 +34,13 @@ class CallFriendDownloader:
 
     def __init__(self, output_dir : str, language="eng-n",
             force_download : bool = False):
+        """
+        Args:
+            output_dir (str): Dir to save the corpus.
+            language (str): Corpus language, one of:
+                    "deu",'eng-n','eng-s','fra-q','jpn','spa-c','spa','zho-m','zho-t'
+            force_download (bool): If True, download entire corpus again.
+        """
         assert language in self._LANGUAGES,\
              f"language must be one of: {self._LANGUAGES}"
         self.language = language
@@ -50,6 +58,7 @@ class CallFriendDownloader:
             not force_download
 
     def __call__(self):
+        """Downloads the entire corpus"""
         if not self.cached:
             self.__download_transcripts()
             self.__download_media()
@@ -62,6 +71,7 @@ class CallFriendDownloader:
         download_zip_from_url(self.trans_url,self.trans_dir)
 
     def __download_media(self):
+        """Scrapes callfriend website for all media files and downloads."""
         # Scare the website for the audio filenames
         http = urllib3.PoolManager()
         resp = http.request('GET',self.media_url)

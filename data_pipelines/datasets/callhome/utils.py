@@ -2,14 +2,22 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-20 11:44:37
+# @Last Modified time: 2022-07-26 14:09:36
 
 import sys
 import os
 import re
 from glob import glob
+from typing import List, Dict
 
-def get_utterances(transcription_root_dir,conversation):
+def get_utterances(transcription_root_dir : str, conversation : str) -> Dict:
+    """
+    Obtain processed utterances for the given conversation.
+    Cleaning up process includes:
+        - Separate the tokens and text.
+        - Remove special characters, tabs, and newlines.
+        - Remove whitespaces and lowercase all.
+    """
     filepath = os.path.join(transcription_root_dir,f"{conversation}.cha")
     with open(filepath,'r') as f:
         # --- Cleaning up the data
@@ -48,6 +56,7 @@ def get_utterances(transcription_root_dir,conversation):
                 })
         return utterances
 
-def get_audio_path(media_root_dir, conversation):
+def get_audio_path(media_root_dir : str, conversation : str) -> str:
+    """Obtain the path to the audio file for the given conversation. """
     path = "{}/{}.mp3".format(media_root_dir,conversation)
     return path

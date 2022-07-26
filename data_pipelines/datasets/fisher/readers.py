@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 12:13:39
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 11:45:36
+# @Last Modified time: 2022-07-26 14:19:45
 
 
 import os
@@ -17,19 +17,29 @@ from collections import defaultdict
 from data_pipelines.datasets.utils import (
     get_subdirs, sph2pipe
 )
-
+from typing import Dict, List
 
 class LDCTranscriptsReader:
+    """
+    Utility for parsing the LDC transcripts of the fisher corpus.
+    Corpus link: https://catalog.ldc.upenn.edu/LDC2004T19
+    """
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir : str):
+        """
+        Args:
+            root_dir (str): Path to the root directory containing transcripts.
+        """
         assert os.path.isdir(root_dir)
         self.root_dir = root_dir
         self.map = self.__generate_map()
 
     def get_sessions(self):
+        """Obtain a list of session names in the corpus"""
         return list(self.map.keys())
 
-    def get_session_transcript(self, session):
+    def get_session_transcript(self, session : str) -> List[Dict]:
+        """Obtain the transcript of the specified session"""
         with open(self.map[session]['trans'],'r') as f:
             utts = []
             conv = f.readlines()
@@ -66,14 +76,24 @@ class LDCTranscriptsReader:
         return map
 
 class LDCAudioReader:
+    """
+    Utility for parsing the LDC Audio of the Fisher corpus.
+    Corpus link:  https://catalog.ldc.upenn.edu/LDC2004S13
+
+    """
 
     PARTICIPANTS = ("A", "B")
+    # Mapping from audio channel to participants.
     CHANNEL_PARTICIPANT_MAPS = {
         1 : "A",
         2 : "B"
     }
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir : str):
+        """
+        Args:
+            root_dir (str): Path to the root directory containing transcripts.
+        """
         assert os.path.isdir(root_dir)
         self.root_path = root_dir
         self.sph_map = self.__generate_sph_map()
@@ -81,9 +101,11 @@ class LDCAudioReader:
         self.mono_map = self.__generate_mono_map()
 
     def get_sessions(self):
+        """Obtain a list of session names in the corpus"""
         return list(self.sph_map.keys())
 
-    def get_session_audio(self, session):
+    def get_session_audio(self, session : str) -> Dict:
+        """Obtain the audio paths of the given session"""
         return {
             "stereo" : self.wav_map[session],
             "A" : self.mono_map[session]["A"],

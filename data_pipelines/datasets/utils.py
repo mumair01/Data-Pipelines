@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 11:14:35
+# @Last Modified time: 2022-07-26 14:36:03
 
 import os
 import sys
@@ -12,12 +12,11 @@ from pathlib import Path
 from pydub import AudioSegment
 from zipfile import ZipFile
 import shutil
-import audiofile
 from sklearn.model_selection import train_test_split
 import json
 import subprocess
+from typing import Any, Dict, List
 
-from data_pipelines.features.opensmile import OpenSmile
 from data_pipelines.utils import get_module_path
 
 ############################# GLOBALS #####################################
@@ -31,40 +30,47 @@ elif sys.platform == "linux":
 
 ############################# GENERAL UTILS ################################
 
-def reset_dir(dir_path):
+def reset_dir(dir_path : str):
+    """Reset the given directory"""
     if os.path.isdir(dir_path):
         shutil.rmtree(dir_path)
     os.makedirs(dir_path)
 
-def write_json(data, filename):
+def write_json(data : Any, filename : str):
+    """Write the given data to a json file"""
     with open(filename, "w", encoding="utf-8") as jsonfile:
         json.dump(data, jsonfile, ensure_ascii=False)
 
 
-def read_json(path, encoding="utf8"):
+def read_json(path : str, encoding : str ="utf8"):
+    """Read the given json file"""
     with open(path, "r", encoding=encoding) as f:
         data = json.loads(f.read())
     return data
 
-def write_txt(txt, name):
-    with open(name, "w") as f:
+def write_txt(txt : str, path : str):
+    """Write the given text to the text file """
+    with open(path, "w") as f:
         f.write("\n".join(txt))
 
 
-def read_txt(path, encoding="utf-8"):
+def read_txt(path : str, encoding : str ="utf-8"):
+    """Read from the given text file"""
     data = []
     with open(path, "r", encoding=encoding) as f:
         for line in f.readlines():
             data.append(line.strip())
     return data
 
-def get_subdirs(dir_path):
+def get_subdirs(dir_path : str):
+    """Obtain all the subdirectories in the given directory"""
     return list(filter(lambda dir: os.path.isdir(dir),
                 [os.path.join(dir_path,d) for d in os.listdir(dir_path)]))
 
 ############################# DOWNLOAD UTILS ################################
 
-def download_from_url(url, url_temp_path, chunk_size=8192):
+def download_from_url(url : str, url_temp_path : str, chunk_size : int = 8192):
+    """Download data from the given url to the given temp path"""
     link_name = Path(url_temp_path).stem
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -79,6 +85,7 @@ def download_from_url(url, url_temp_path, chunk_size=8192):
 
 def download_zip_from_url(url, output_dir, extract=True, chunk_size=8192,
                           cleanup=True):
+    """Download a zipfile from the given url"""
     link_name = Path(url).stem
     url_temp_path = "{}.zip".format(os.path.join(output_dir, link_name))
     # Download and extract
@@ -90,6 +97,7 @@ def download_zip_from_url(url, output_dir, extract=True, chunk_size=8192,
         os.remove(url_temp_path)
 
 def extract_from_zip(zip_file_path, output_dir):
+    """Extract data from the given zip file."""
     with ZipFile(zip_file_path, 'r') as zipObj:
         # Extract all the contents of zip file in different directory
         os.makedirs(output_dir, exist_ok=True)
@@ -115,23 +123,12 @@ def stereo_to_mono(stereo_path, output_dir,left_prefix="left",right_prefix="righ
     return mono_left, mono_right
 
 
-def extract_feature_set(audio_path, feature_set):
-    signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
-    smile = OpenSmile(
-        feature_set=feature_set,
-        feature_level="lld",
-        sample_rate=sampling_rate,
-        normalize=False)
-    f = smile(signal)
-    return {
-        "values" : f,
-        "features" : list(smile.idx2feat.values())
-    }
-
-
 # TODO: Add the other sph2pipe flags.
 def sph2pipe(infile, outdir=None,outfile_suffix="", c=None):
-    """Python wrapper for sph2pipe tool"""
+    """
+    Python wrapper for sph2pipe tool.
+    Link: https://www.openslr.org/3/
+    """
     assert os.path.isfile(infile)
     # Generate the outfile path
     if outdir == None:

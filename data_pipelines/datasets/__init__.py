@@ -2,12 +2,6 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-07 17:22:16
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-07 17:22:18
+# @Last Modified time: 2022-07-26 14:48:46
 
-
-def main():
-    print("Hello, World!")
-
-
-if __name__ == "__main__":
-    main()
+from data_pipelines.datasets.loaders import load_data

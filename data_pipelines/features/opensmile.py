@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-07 16:44:55
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 12:26:35
+# @Last Modified time: 2022-07-26 14:44:43
 
 
 import os
@@ -10,12 +10,8 @@ import subprocess
 from matplotlib import use
 import opensmile
 import audiofile
-import argparse
-import shutil
-import pandas as pd
-import glob
-
 import torch
+from typing import Dict
 
 from data_pipelines.utils import get_module_path
 from data_pipelines.features.utils import z_norm, z_norm_non_zero
@@ -26,6 +22,10 @@ _EGEMAPS_V02_50MS_CONF = os.path.join(
 
 
 class OpenSmile:
+    """
+    Class for using opensmile to extract audio features.
+    Link: https://audeering.github.io/opensmile-python/
+    """
 
     _FEATURE_SETS = ["egemapsv02_default", "egemapsv02_50ms"]
 
@@ -35,6 +35,17 @@ class OpenSmile:
             feature_level="lld",
             sample_rate=16_000, normalize=False,
             use_smile=False,):
+        """
+        Args:
+            feature_set (str): Feature set to extract.
+                One of: ["egemapsv02_default", "egemapsv02_50ms"]
+            feature_level (str): Feature level to extract. One of: lld or func
+            sample_rate (int)
+            use_simle (bool):
+                If True, use SmileExtract instead of OpenSmile. SmileExtract
+                must be installed in this case.
+                Link: https://www.audeering.com/research/opensmile/
+        """
         self.feature_set = feature_set
         self.sample_rate = sample_rate
         self.normalize = normalize
@@ -134,7 +145,21 @@ class OpenSmile:
         except:
             pass
 
-
-
+def extract_feature_set(audio_path : str, feature_set : str) -> Dict :
+    """
+    Convenience method for extracting audio features of the given feature set.
+    Use OpenSmile directly if this does not cover all cases
+    """
+    signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
+    smile = OpenSmile(
+        feature_set=feature_set,
+        feature_level="lld",
+        sample_rate=sampling_rate,
+        normalize=False)
+    f = smile(signal)
+    return {
+        "values" : f,
+        "features" : list(smile.idx2feat.values())
+    }
 
 

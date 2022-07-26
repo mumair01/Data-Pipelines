@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:39:35
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-20 11:52:59
+# @Last Modified time: 2022-07-26 14:04:35
 
 import os
 import sys
@@ -20,6 +20,7 @@ class DownloadPaths:
     media_dir : str
 
 class CallHomeDownloader:
+    """Utility for downloading the callhome corpus"""
 
     BASE_TRANS_URL = "https://ca.talkbank.org/data/CallHome/{}.zip"
     BASE_MEDIA_URL = "https://media.talkbank.org/ca/CallHome"
@@ -35,6 +36,13 @@ class CallHomeDownloader:
 
     def __init__(self, output_dir : str, language="eng",
             force_download : bool = False):
+        """
+        Args:
+            output_dir (str): Dir to save the corpus.
+            language (str): Corpus language, one of:
+                    'ara','deu','eng','jpn','spa','zho'
+            force_download (bool): If True, download entire corpus again.
+        """
         assert language in self._LANGUAGES,\
              f"language must be one of: {self._LANGUAGES}"
 
@@ -53,6 +61,7 @@ class CallHomeDownloader:
             not force_download
 
     def __call__(self):
+        """Downloads the entire corpus"""
         if not self.cached:
             self.__download_transcripts()
             self.__download_media()
@@ -65,6 +74,7 @@ class CallHomeDownloader:
         download_zip_from_url(self.trans_url,self.trans_dir)
 
     def __download_media(self):
+        """Scrapes callfriend website for all media files and downloads."""
         # Scare the website for the audio filenames
         http = urllib3.PoolManager()
         resp = http.request('GET',self.media_url)

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 15:38:46
+# @Last Modified time: 2022-07-26 14:32:12
 
 import sys
 import os
@@ -12,8 +12,10 @@ from dataclasses import dataclass
 import datasets
 from datasets import Value, Audio, Array3D
 
-from data_pipelines.datasets.switchboard.isip import ISIPAlignedCorpusReader
-from data_pipelines.datasets.switchboard.ldc import LDCAudioCorpusReader
+from data_pipelines.datasets.switchboard.readers import (
+    ISIPAlignedCorpusReader,
+    LDCAudioCorpusReader
+)
 from data_pipelines.datasets.utils import (
     get_train_val_test_splits, extract_feature_set
 )
@@ -31,28 +33,16 @@ _LDC_CITATION = """\
     IEEE International Conference on Acoustics, Speech, and Signal Processing,
      1992, pp. 517-520 vol.1, doi: 10.1109/ICASSP.1992.225858."""
 
-_DIALOG_FEATURES = {
-    "start" : Value('float'),
-    "end" : Value("float"),
-    "word" : Value("string")
-}
-
-_TEST_SPLIT_SIZE = 0.25
-_VAL_SPLIT_SIZE = 0.2
-_GLOBAL_SEED = 42
 
 class SwitchboardConfig(datasets.BuilderConfig):
     def __init__(self, homepage, description, citation, data_url, features,
-            test_size, val_size, seed, **kwargs):
+            **kwargs):
         super().__init__(**kwargs)
         self.homepage = homepage
         self.description = description
         self.citation = citation
         self.data_url = data_url
         self.features = features
-        self.test_size = test_size
-        self.val_size = val_size
-        self.seed = seed
 
 class Switchboard(datasets.GeneratorBasedBuilder):
 
@@ -85,9 +75,6 @@ class Switchboard(datasets.GeneratorBasedBuilder):
                     }]
                 }]
             },
-            test_size=_TEST_SPLIT_SIZE,
-            val_size=_VAL_SPLIT_SIZE,
-            seed=_GLOBAL_SEED
         ),
         # NOTE: The ldc-audio requires the unzipped data directory path for now.
         SwitchboardConfig(
@@ -103,14 +90,7 @@ class Switchboard(datasets.GeneratorBasedBuilder):
                     "stereo" : Value('string'),
                     "mono" : Value('string')
                 },
-                "egemaps" : {
-                    "values" : Array3D(shape=(1,-1,25),dtype='float64'),
-                    "features" : [Value("string")]
-                },
             },
-            test_size=_TEST_SPLIT_SIZE,
-            val_size=_VAL_SPLIT_SIZE,
-            seed=_GLOBAL_SEED
         )
     ]
 
@@ -135,59 +115,64 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             self.reader = LDCAudioCorpusReader(extracted_path)
         else:
             raise NotImplementedError()
-        # Generate the data splits
-        tmp_path = os.path.join(extracted_path,"splits")
-        os.makedirs(tmp_path,exist_ok=True)
         sessions = self.reader.get_sessions()
-        train, val, test = get_train_val_test_splits(
-            sessions,self.config.test_size, self.config.val_size,self.
-            config.seed)
-        splits = {}
-        for split, dialogues in zip(
-                ('train','validation','test'), (train, val,test)):
-            path = os.path.join(tmp_path,"{}.txt".format(split))
-            with open(path, 'w') as f:
-                f.writelines("\n".join(dialogues))
-                splits[split] = path
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath" : splits['train']}),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={"filepath" : splits['validation']}),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={"filepath" : splits['test']}),
+                name=datasets.Split.ALL,
+                gen_kwargs={"sessions" : sessions})
         ]
+        # NOTE: Remove the following code block since splits are not inherently
+        # generated in the data.
+        # ------------------
+        # Generate the data splits
+        # tmp_path = os.path.join(extracted_path,"splits")
+        # os.makedirs(tmp_path,exist_ok=True)
+        # sessions = self.reader.get_sessions()
+        # train, val, test = get_train_val_test_splits(
+        #     sessions,self.config.test_size, self.config.val_size,self.
+        #     config.seed)
+        # splits = {}
+        # for split, dialogues in zip(
+        #         ('train','validation','test'), (train, val,test)):
+        #     path = os.path.join(tmp_path,"{}.txt".format(split))
+        #     with open(path, 'w') as f:
+        #         f.writelines("\n".join(dialogues))
+        #         splits[split] = path
+        # return [
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.TRAIN,
+        #         gen_kwargs={"filepath" : splits['train']}),
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.VALIDATION,
+        #         gen_kwargs={"filepath" : splits['validation']}),
+        #     datasets.SplitGenerator(
+        #         name=datasets.Split.TEST,
+        #         gen_kwargs={"filepath" : splits['test']}),
+        # ]
+        # ------------------
 
-    def _generate_examples(self, filepath):
-        with open(filepath,'r') as f:
-            sessions = [d.rstrip("\n") for d in f.readlines()]
-            for session in sessions:
-                for participant in self.reader.PARTICIPANTS:
-                    if self.config.name == "isip-aligned":
-                        conv = self.reader.get_session_transcript(
-                            session,participant)
-                        yield f"{session}_{participant}", {
-                            "session" : session,
-                            "participant" : participant,
-                            "turns" : conv
-                        }
-                    elif self.config.name == "ldc-audio":
-                        mono_path = self.reader.mono_paths[session][participant]
-                        # Extract egemaps
-                        egemaps = extract_feature_set(mono_path,'egemapsv02_50ms')
-                        yield f"{session}_{participant}",{
-                            "session" : session,
-                            "participant" : participant,
-                            "audio_paths" : {
-                                "stereo" : self.reader.wav_paths[session],
-                                "mono" : mono_path
-                            },
-                            "egemaps" : egemaps
-                        }
-                    else:
-                        raise NotImplementedError()
+    def _generate_examples(self, sessions):
+        for session in sessions:
+            for participant in self.reader.PARTICIPANTS:
+                if self.config.name == "isip-aligned":
+                    conv = self.reader.get_session_transcript(
+                        session,participant)
+                    yield f"{session}_{participant}", {
+                        "session" : session,
+                        "participant" : participant,
+                        "turns" : conv
+                    }
+                elif self.config.name == "ldc-audio":
+                    mono_path = self.reader.mono_paths[session][participant]
+                    yield f"{session}_{participant}",{
+                        "session" : session,
+                        "participant" : participant,
+                        "audio_paths" : {
+                            "stereo" : self.reader.wav_paths[session],
+                            "mono" : mono_path
+                        },
+                    }
+                else:
+                    raise NotImplementedError()
 
 

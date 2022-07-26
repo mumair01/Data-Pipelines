@@ -2,16 +2,24 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:35:56
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 16:46:51
+# @Last Modified time: 2022-07-26 14:00:50
 
 
 import sys
 import os
 import re
 import glob
+from typing import Dict, List
 
 # TODO: Need to clean up the data better.
-def get_utterances(transcription_root_dir,conversation):
+def get_utterances(transcription_root_dir : str,conversation : str) -> Dict:
+    """
+    Obtain processed / cleaned utterances from the callfriend corpus.
+    Preprocessing includes:
+        - Replacing tabs and newlines.
+        - Lowercasing all words.
+        - Removing special characters.
+    """
     filepath = os.path.join(transcription_root_dir,f"{conversation}.cha")
     with open(filepath,'r') as f:
         # --- Cleaning up the data
@@ -50,9 +58,11 @@ def get_utterances(transcription_root_dir,conversation):
                 })
         return utterances
 
-def get_audio_path(media_root_dir, conversation):
+def get_audio_path(media_root_dir : str, conversation : str) -> str:
+    """Obtain the path of the audio file corresponding to the given conversation"""
     path = "{}/{}.mp3".format(media_root_dir,conversation)
     return path
 
-def get_conversations(transcription_root_dir):
+def get_conversations(transcription_root_dir : str) -> List[str]:
+    """Obtain all the conversation chat file paths"""
     return glob.glob("{}/*.cha".format(transcription_root_dir))

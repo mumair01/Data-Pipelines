@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-12 15:52:16
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-19 11:16:39
+# @Last Modified time: 2022-07-26 14:20:48
 
 ##############################
 # This script contains methods to extract various features from the maptask
@@ -10,6 +10,8 @@
 # extract voice activity annotations / pause annotations directly from this
 # corpus but no methods for speech features that are generalized
 #  (e.g., pitch etc).
+# TODO: This needs to be removed i.e., it is specific to the Skantze TRP
+# models.
 ##############################
 
 import os
