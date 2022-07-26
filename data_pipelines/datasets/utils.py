@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 15:48:00
+# @Last Modified time: 2022-07-26 11:14:35
 
 import os
 import sys
@@ -57,6 +57,10 @@ def read_txt(path, encoding="utf-8"):
         for line in f.readlines():
             data.append(line.strip())
     return data
+
+def get_subdirs(dir_path):
+    return list(filter(lambda dir: os.path.isdir(dir),
+                [os.path.join(dir_path,d) for d in os.listdir(dir_path)]))
 
 ############################# DOWNLOAD UTILS ################################
 

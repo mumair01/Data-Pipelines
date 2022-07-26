@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-22 13:59:20
+# @Last Modified time: 2022-07-26 11:44:35
 import sys
 import os
 import glob
@@ -14,8 +14,9 @@ from data_pipelines.datasets.utils import (
     get_train_val_test_splits, extract_feature_set,read_txt
 )
 
-from data_pipelines.datasets.fisher.readers import LDCTranscriptsReader
-
+from data_pipelines.datasets.fisher.readers import (
+    LDCTranscriptsReader, LDCAudioReader
+)
 
 _FISHER_HOMEPAGE = ""
 _FISHER_DESCRIPTION = """"""
@@ -29,6 +30,14 @@ _DEFAULT_FEATURES = {
         "speaker" : Value('string'),
         "text" : Value('string')
     }]
+}
+_AUDIO_FEATURES = {
+    "session" : Value('string'),
+    "audio_paths" : {
+        "stereo" : Value('string'),
+        "A" : Value('string'),
+        "B" : Value('string')
+    }
 }
 
 _TEST_SPLIT_SIZE = 0.25
@@ -57,7 +66,16 @@ class Fisher(datasets.GeneratorBasedBuilder):
             test_size=_TEST_SPLIT_SIZE,
             val_size=_VAL_SPLIT_SIZE,
             seed=_GLOBAL_SEED
-        )
+        ),
+        FisherConfig(
+            name="audio",
+            homepage = "",
+            description = "",
+            features=_AUDIO_FEATURES,
+            test_size=_TEST_SPLIT_SIZE,
+            val_size=_VAL_SPLIT_SIZE,
+            seed=_GLOBAL_SEED
+        ),
     ]
 
     def _info(self):
@@ -73,8 +91,8 @@ class Fisher(datasets.GeneratorBasedBuilder):
         # self.config.data_dir
         if self.config.name == "default":
             self.reader = LDCTranscriptsReader(self.config.data_dir)
-        else:
-            raise NotImplementedError()
+        elif self.config.name == "audio":
+            self.reader = LDCAudioReader(self.config.data_dir)
         # Generate the data splits
         tmp_path = os.path.join(self.config.data_dir,"splits")
         os.makedirs(tmp_path,exist_ok=True)
@@ -109,4 +127,10 @@ class Fisher(datasets.GeneratorBasedBuilder):
                 yield f"{session}", {
                     "session" : session,
                     "utterances" : conv
+                }
+            elif self.config.name == "audio":
+                audio_paths = self.reader.get_session_transcript(session)
+                yield f"{session}", {
+                    "session" : session,
+                    "audio_paths" : audio_paths
                 }
