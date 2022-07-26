@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:22:19
+# @Last Modified time: 2022-07-26 15:53:55
 
 import sys
 import os
@@ -20,15 +20,15 @@ from data_pipelines.datasets.switchboard.readers import (
 
 _LDC_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC97S62"
 _LDC_DESCRIPTION = """\
-    The Switchboard-1 Telephone Speech Corpus (LDC97S62) consists of
-    approximately 260 hours of speech and was originally
-    collected by Texas Instruments in 1990-1, under DARPA
+    The Switchboard-1 Telephone Speech Corpus (LDC97S62) consists of\
+    approximately 260 hours of speech and was originally\
+    collected by Texas Instruments in 1990-1, under DARPA\
     sponsorship
     """
 _LDC_CITATION = """\
-    J. J. Godfrey, E. C. Holliman and J. McDaniel, "SWITCHBOARD: telephone
-    speech corpus for research and development," [Proceedings] ICASSP-92: 1992
-    IEEE International Conference on Acoustics, Speech, and Signal Processing,
+    J. J. Godfrey, E. C. Holliman and J. McDaniel, "SWITCHBOARD: telephone\
+    speech corpus for research and development," [Proceedings] ICASSP-92: 1992\
+    IEEE International Conference on Acoustics, Speech, and Signal Processing,\
      1992, pp. 517-520 vol.1, doi: 10.1109/ICASSP.1992.225858."""
 
 
@@ -51,12 +51,12 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             name="isip-aligned",
             homepage = "https://isip.piconepress.com/projects/switchboard/",
             description = """`\
-                Several lexicon items were fixed in the 10/19/02 release, and
-                about 45 start/stop times that had negative durations
-                (stop time preceded the start time) were repaired. We are no
-                longer actively developing this resource, but continue to
-                include bug fixes. Included in this release are the final
-                transcriptions for the entire database, the complete lexicon,
+                Several lexicon items were fixed in the 10/19/02 release, and\
+                about 45 start/stop times that had negative durations\
+                (stop time preceded the start time) were repaired. We are no\
+                longer actively developing this resource, but continue to\
+                include bug fixes. Included in this release are the final\
+                transcriptions for the entire database, the complete lexicon,\
                 and automatic word alignments.
                 """ + "\n" + _LDC_DESCRIPTION,
             citation=_LDC_CITATION,
@@ -98,11 +98,12 @@ class Switchboard(datasets.GeneratorBasedBuilder):
 
     @property
     def manual_download_instructions(self):
-        return (
-            f""""To use some variants of the Switchboard, you have to download
-            it manually. The audio is available at {_LDC_AUDIO_CORPUS_URL}.
-            """
-        )
+        if self.config.name == "ldc-audio":
+            return (
+                f""""To use some variants of the Switchboard, you have to download\
+                it manually. The audio is available at {_LDC_AUDIO_CORPUS_URL}.\
+                """
+            )
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -117,13 +118,14 @@ class Switchboard(datasets.GeneratorBasedBuilder):
         # Select the reader
         if self.config.name == "isip-aligned":
             extracted_path = dl_manager.download_and_extract(self.config.data_url)
+            print(extracted_path)
             self.reader = ISIPAlignedCorpusReader(extracted_path)
         elif self.config.name == "ldc-audio":
             extracted_path = self.config.data_dir
             if not os.path.isdir(extracted_path):
                 raise FileNotFoundError(
-                    f""""{extracted_path} does not exist. Make sure you insert
-                    a manual dir via `datasets.load_dataset('matinf', data_dir=...)`
+                    f""""{extracted_path} does not exist. Make sure you insert\
+                    a manual dir via `datasets.load_dataset('matinf', data_dir=...)`\
                     Manual download instructions: {self.manual_download_instructions}"""
                 )
             self.reader = LDCAudioCorpusReader(extracted_path)

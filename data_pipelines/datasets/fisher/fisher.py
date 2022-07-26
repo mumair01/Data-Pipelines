@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:16:44
+# @Last Modified time: 2022-07-26 15:35:36
 import sys
 import os
 import glob
@@ -86,9 +86,9 @@ class Fisher(datasets.GeneratorBasedBuilder):
     @property
     def manual_download_instructions(self):
         return (
-            f""""To use Fisher you have to download it manually. The transcripts
-            can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio
-            can be downloaded from {_FISHER_LDC_SPEECH_URL}
+            f""""To use Fisher you have to download it manually. The transcripts\
+            can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio\
+            can be downloaded from {_FISHER_LDC_SPEECH_URL}\
             """
         )
 
