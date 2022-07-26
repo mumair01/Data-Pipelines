@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:13:29
+# @Last Modified time: 2022-07-26 15:16:44
 import sys
 import os
 import glob
@@ -10,17 +10,35 @@ import glob
 import datasets
 from datasets import Value
 
-from data_pipelines.datasets.utils import (
-    get_train_val_test_splits,read_txt
-)
-
 from data_pipelines.datasets.fisher.readers import (
     LDCTranscriptsReader, LDCAudioReader
 )
 
-_FISHER_HOMEPAGE = ""
-_FISHER_DESCRIPTION = """"""
-_FISHER_CITATION = ""
+_FISHER_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC2004T19"
+_FISHER_DESCRIPTION = """\
+    Fisher English Training Speech Part 1 Transcripts was developed by the
+    Linguistic Data Consortium (LDC) and contains time-aligned transcript data
+    for 5,850 telephone conversations (984 hours) in English. In addition to
+    the transcriptions, there is a complete set of tables describing the speakers,
+    the properties of the telephone calls, and the set of topics that were used
+    to initiate the conversations. The corresponding speech files for these
+    transcripts are contained in Fisher English Training Speech Part 1 Speech
+    (LDC2004S13).
+"""
+_FISHER_CITATION = """\
+    @inproceedings{cieri2004fisher,
+    title={The Fisher corpus: A resource for the next generations of speech-to-text.},
+    author={Cieri, Christopher and Miller, David and Walker, Kevin},
+    booktitle={LREC},
+    volume={4},
+    pages={69--71},
+    year={2004}
+    }
+"""
+
+_FISHER_LDC_SPEECH_URL = "https://catalog.ldc.upenn.edu/LDC2004T19"
+_FISHER_LDC_TRANSCRIPTS_URL = "https://catalog.ldc.upenn.edu/LDC2004T19"
+
 
 _DEFAULT_FEATURES = {
     "session" : Value('string'),
@@ -40,10 +58,6 @@ _AUDIO_FEATURES = {
     }
 }
 
-# _TEST_SPLIT_SIZE = 0.25
-# _VAL_SPLIT_SIZE = 0.2
-# _GLOBAL_SEED = 42
-
 class FisherConfig(datasets.BuilderConfig):
 
     def __init__(self, homepage, description, features, **kwargs):
@@ -57,17 +71,26 @@ class Fisher(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         FisherConfig(
             name="default",
-            homepage = "",
-            description = "",
+            homepage = _FISHER_HOMEPAGE,
+            description = _FISHER_DESCRIPTION,
             features=_DEFAULT_FEATURES,
         ),
         FisherConfig(
             name="audio",
-            homepage = "",
-            description = "",
+            homepage = _FISHER_HOMEPAGE,
+            description = _FISHER_DESCRIPTION,
             features=_AUDIO_FEATURES,
         ),
     ]
+
+    @property
+    def manual_download_instructions(self):
+        return (
+            f""""To use Fisher you have to download it manually. The transcripts
+            can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio
+            can be downloaded from {_FISHER_LDC_SPEECH_URL}
+            """
+        )
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -80,6 +103,14 @@ class Fisher(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager : datasets.DownloadManager):
         # NOTE: The data must be manually downloaded and specified in
         # self.config.data_dir
+
+        if not os.path.isdir(self.config.data_dir):
+            raise FileNotFoundError(
+                f""""{self.config.data_dir} does not exist. Make sure you insert
+                a manual dir via `datasets.load_dataset('matinf', data_dir=...)`
+                Manual download instructions: {self.manual_download_instructions}"""
+            )
+
         if self.config.name == "default":
             self.reader = LDCTranscriptsReader(self.config.data_dir)
         elif self.config.name == "audio":
@@ -87,39 +118,9 @@ class Fisher(datasets.GeneratorBasedBuilder):
         sessions = self.reader.get_sessions()
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.ALL,
-                gen_kwargs={"filepath" : sessions}),
+                name="full",
+                gen_kwargs={"sessions" : sessions}),
         ]
-
-        # NOTE: Remove the following code block since splits are not inherently
-        # generated in the data.
-        # ------------------
-        # Generate the data splits
-        # tmp_path = os.path.join(self.config.data_dir,"splits")
-        # os.makedirs(tmp_path,exist_ok=True)
-        # sessions = self.reader.get_sessions()
-        # train, val, test = get_train_val_test_splits(
-        #     sessions,self.config.test_size, self.config.val_size,self.
-        #     config.seed)
-        # splits = {}
-        # for split, dialogues in zip(
-        #         ('train','validation','test'), (train, val,test)):
-        #     path = os.path.join(tmp_path,"{}.txt".format(split))
-        #     with open(path, 'w') as f:
-        #         f.writelines("\n".join(dialogues))
-        #         splits[split] = path
-        # return [
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TRAIN,
-        #         gen_kwargs={"filepath" : splits['train']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.VALIDATION,
-        #         gen_kwargs={"filepath" : splits['validation']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TEST,
-        #         gen_kwargs={"filepath" : splits['test']}),
-        # ]
-         # ------------------
 
     def _generate_examples(self, sessions):
         for session in sessions:

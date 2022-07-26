@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:14:12
+# @Last Modified time: 2022-07-26 15:17:02
 
 import os
 
@@ -15,9 +15,21 @@ from data_pipelines.datasets.callfriend.utils import (
     get_utterances, get_audio_path, get_conversations
 )
 
-_CALLFRIEND_HOMEPAGE = ""
-_CALLFRIEND_DESCRIPTION = ""
-_CALLFRIEND_CITATION = ""
+_CALLFRIEND_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC96S46"
+_CALLFRIEND_DESCRIPTION = """\
+    The corpus consists of 60 unscripted telephone conversations,
+    lasting between 5-30 minutes. The corpus also includes documentation
+    describing speaker information (sex, age, education, callee telephone number)
+    and call information (channel quality, number of speakers)."""
+_CALLFRIEND_CITATION = """\
+    @article{canavan1996callfriend,
+    title={Callfriend american english-non-southern dialect},
+    author={Canavan, Alexandra and Zipperlen, George},
+    journal={Linguistic Data Consortium, Philadelphia},
+    volume={10},
+    number={1},
+    year={1996}
+}"""
 
 _DEFAULT_FEATURES = {
     "id" : Value('string'),
@@ -34,10 +46,6 @@ _AUDIO_FEATURES = {
     "id" : Value('string'),
     "path" : Value("string"),
 }
-
-# _TEST_SPLIT_SIZE = 0.25
-# _VAL_SPLIT_SIZE = 0.2
-# _GLOBAL_SEED = 42
 
 
 class CallHomeConfig(datasets.BuilderConfig):
@@ -84,45 +92,10 @@ class CallHome(datasets.GeneratorBasedBuilder):
         conversations = get_conversations(self.download_paths.transcriptions_dir)
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.ALL,
+                name="full",
                 gen_kwargs={"conversations" : conversations}
             )
         ]
-
-        # NOTE: Remove the following code block since splits are not inherently
-        # generated in the data.
-        # ------------------
-        # --- Generate the data splits
-        # tmp_path = os.path.join(dataset_dir,"splits")
-        # os.makedirs(tmp_path,exist_ok=True)
-        # conversations = get_conversations(self.download_paths.transcriptions_dir)
-        # conversations = [os.path.splitext(os.path.basename(conv))[0] \
-        #     for conv in conversations]
-        # train, val, test = get_train_val_test_splits(
-        #     conversations,self.config.test_size, self.config.val_size,self.
-        #     config.seed)
-        # splits = {}
-        # for split, dialogues in zip(
-        #         ('train','validation','test'), (train, val,test)):
-        #     path = os.path.join(tmp_path,"{}.txt".format(split))
-        #     with open(path, 'w') as f:
-        #         f.writelines("\n".join(dialogues))
-        #         splits[split] = path
-
-        # return [
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TRAIN,
-        #         gen_kwargs={"filepath" : splits['train']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.VALIDATION,
-        #         gen_kwargs={"filepath" : splits['validation']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TEST,
-        #         gen_kwargs={"filepath" : splits['test']}),
-        # ]
-        # -------------------
-
-
 
     def _generate_examples(self, conversations):
         for conversation in conversations:

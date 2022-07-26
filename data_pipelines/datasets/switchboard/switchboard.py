@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:32:12
+# @Last Modified time: 2022-07-26 15:16:29
 
 import sys
 import os
@@ -33,6 +33,8 @@ _LDC_CITATION = """\
     IEEE International Conference on Acoustics, Speech, and Signal Processing,
      1992, pp. 517-520 vol.1, doi: 10.1109/ICASSP.1992.225858."""
 
+
+_LDC_AUDIO_CORPUS_URL = "https://catalog.ldc.upenn.edu/LDC97S62"
 
 class SwitchboardConfig(datasets.BuilderConfig):
     def __init__(self, homepage, description, citation, data_url, features,
@@ -96,6 +98,14 @@ class Switchboard(datasets.GeneratorBasedBuilder):
 
     ############################ Overridden Methods ##########################
 
+    @property
+    def manual_download_instructions(self):
+        return (
+            f""""To use some variants of the Switchboard, you have to download
+            it manually. The audio is available at {_LDC_AUDIO_CORPUS_URL}.
+            """
+        )
+
     def _info(self):
         return datasets.DatasetInfo(
             description=self.config.description,
@@ -112,44 +122,21 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             self.reader = ISIPAlignedCorpusReader(extracted_path)
         elif self.config.name == "ldc-audio":
             extracted_path = self.config.data_dir
+            if not os.path.isdir(extracted_path):
+                raise FileNotFoundError(
+                    f""""{extracted_path} does not exist. Make sure you insert
+                    a manual dir via `datasets.load_dataset('matinf', data_dir=...)`
+                    Manual download instructions: {self.manual_download_instructions}"""
+                )
             self.reader = LDCAudioCorpusReader(extracted_path)
         else:
             raise NotImplementedError()
         sessions = self.reader.get_sessions()
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.ALL,
+                name="full",
                 gen_kwargs={"sessions" : sessions})
         ]
-        # NOTE: Remove the following code block since splits are not inherently
-        # generated in the data.
-        # ------------------
-        # Generate the data splits
-        # tmp_path = os.path.join(extracted_path,"splits")
-        # os.makedirs(tmp_path,exist_ok=True)
-        # sessions = self.reader.get_sessions()
-        # train, val, test = get_train_val_test_splits(
-        #     sessions,self.config.test_size, self.config.val_size,self.
-        #     config.seed)
-        # splits = {}
-        # for split, dialogues in zip(
-        #         ('train','validation','test'), (train, val,test)):
-        #     path = os.path.join(tmp_path,"{}.txt".format(split))
-        #     with open(path, 'w') as f:
-        #         f.writelines("\n".join(dialogues))
-        #         splits[split] = path
-        # return [
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TRAIN,
-        #         gen_kwargs={"filepath" : splits['train']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.VALIDATION,
-        #         gen_kwargs={"filepath" : splits['validation']}),
-        #     datasets.SplitGenerator(
-        #         name=datasets.Split.TEST,
-        #         gen_kwargs={"filepath" : splits['test']}),
-        # ]
-        # ------------------
 
     def _generate_examples(self, sessions):
         for session in sessions:

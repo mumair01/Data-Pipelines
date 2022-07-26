@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 13:31:18
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 11:44:01
+# @Last Modified time: 2022-07-26 15:11:36
 
 
 import pytest
@@ -13,6 +13,7 @@ from data_pipelines.datasets.fisher.readers import (
 )
 
 from data_pipelines.datasets.fisher import load_fisher
+from data_pipelines.datasets import load_data
 
 def test_fisher():
     TRANSCRIPTS_ROOT = "/Users/muhammadumair/Desktop/fe_03_p1_tran"
@@ -23,5 +24,11 @@ def test_fisher():
     # for session in reader.get_sessions():
     #     reader.get_session_transcript(session)
     #load_dataset(LOAD_SCRIPT,name="default",data_dir=TRANSCRIPTS_ROOT)
-    dataset = load_fisher(variant="audio",data_dir=AUDIO_ROOT)
-    print(dataset['train'][0])
+    # dataset = load_fisher(variant="audio",data_dir=AUDIO_ROOT)
+    # print(dataset['train'][0])
+
+    dataset = load_data(
+        dataset="fisher",
+        variant="default"
+    )
+    print(dataset['all'][0])

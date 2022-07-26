@@ -2,14 +2,17 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:54:27
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-21 15:42:19
+# @Last Modified time: 2022-07-26 15:12:27
 
 import pytest
 from datasets import load_dataset
 
 from data_pipelines.datasets.switchboard import load_switchboard
-from data_pipelines.datasets.switchboard.isip import ISIPAlignedCorpusReader
-from data_pipelines.datasets.switchboard.ldc import LDCAudioCorpusReader
+from data_pipelines.datasets.switchboard.readers import (
+    ISIPAlignedCorpusReader,
+    LDCAudioCorpusReader
+)
+from data_pipelines.datasets import load_data
 
 def test_switchboard():
     SWITCHBOARD_AUDIO_PATH = "/Users/muhammadumair/Documents/Research/Projects Data/Corpora/switchboard_swb1_LDC97S62"
@@ -30,3 +33,8 @@ def test_switchboard():
     # load_switchboard(variant="ldc-audio",data_dir=SWITCHBOARD_AUDIO_PATH)
     # load_switchboard(variant="isip-aligned")
     # load_switchboard(variant="swda")
+
+    load_data(
+        dataset="switchboard",
+        variant="default"
+    )
