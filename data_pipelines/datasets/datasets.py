@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:45:40
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-27 08:39:32
+# @Last Modified time: 2022-07-27 09:38:36
 
 import os
 import glob
@@ -39,12 +39,6 @@ def load_data(dataset,**kwargs):
         "cache_dir" : _CACHE_DIR,
     })
     return _LOADERS[dataset](**kwargs)
-
-
-def clear_downloads():
-    """Remove all the downloads from the cache"""
-    reset_dir(_DOWNLOADS_DIR)
-
 
 def get_cache_dir():
     return _CACHE_DIR
