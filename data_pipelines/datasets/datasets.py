@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:45:40
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 17:22:18
+# @Last Modified time: 2022-07-27 08:39:32
 
 import os
 import glob
@@ -16,6 +16,7 @@ from data_pipelines.datasets.switchboard import load_switchboard
 
 from data_pipelines.datasets.utils import reset_dir
 
+
 _LOADERS = {
     "callfriend" : load_callfriend,
     "callhome" : load_callhome,
@@ -26,6 +27,7 @@ _LOADERS = {
 
 _CACHE_DIR = os.path.join(os.path.expanduser("~"),".cache/data_pipelines/datasets")
 _DOWNLOADS_DIR = os.path.join(_CACHE_DIR,"downloads")
+
 
 
 def load_data(dataset,**kwargs):
@@ -44,3 +46,8 @@ def clear_downloads():
     reset_dir(_DOWNLOADS_DIR)
 
 
+def get_cache_dir():
+    return _CACHE_DIR
+
+def get_downloads_dir():
+    return _DOWNLOADS_DIR
