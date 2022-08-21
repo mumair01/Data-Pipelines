@@ -25,6 +25,7 @@ might not be publicly available.
   - [Switchboard](#switchboard)
 - [Features Package](#features-package)
 - [Cleanup](#cleanup)
+- [Acknowledgements]()
 
 ## Getting Started
 
@@ -357,3 +358,8 @@ def get_downloads_dir() -> str:
     """Provides the absolute path to the download dir"""
     return _DOWNLOADS_DIR
 ```
+
+## Acknowledgements
+
+This project uses the [transformers library](https://aclanthology.org/2020.emnlp-demos.6/)
+and was inspired by Erik's [datasets_turntaking project](https://github.com/ErikEkstedt/datasets_turntaking).
