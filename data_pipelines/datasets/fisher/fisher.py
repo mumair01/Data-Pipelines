@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:35:36
+# @Last Modified time: 2022-08-21 11:04:44
 import sys
 import os
 import glob
@@ -86,10 +86,9 @@ class Fisher(datasets.GeneratorBasedBuilder):
     @property
     def manual_download_instructions(self):
         return (
-            f""""To use Fisher you have to download it manually. The transcripts\
-            can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio\
-            can be downloaded from {_FISHER_LDC_SPEECH_URL}\
-            """
+            f"To use Fisher you have to download it manually. The transcripts "
+            f"can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio "
+            f"can be downloaded from {_FISHER_LDC_SPEECH_URL}"
         )
 
     def _info(self):
@@ -106,9 +105,9 @@ class Fisher(datasets.GeneratorBasedBuilder):
 
         if not os.path.isdir(self.config.data_dir):
             raise FileNotFoundError(
-                f""""{self.config.data_dir} does not exist. Make sure you insert
-                a manual dir via `datasets.load_dataset('matinf', data_dir=...)`
-                Manual download instructions: {self.manual_download_instructions}"""
+                f"{self.config.data_dir} does not exist. Make sure you insert "
+                f"a manual dir via `datasets.load_dataset('matinf', data_dir=...)` "
+                f"Manual download instructions: {self.manual_download_instructions}"
             )
 
         if self.config.name == "default":

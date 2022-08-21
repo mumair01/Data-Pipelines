@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:53:55
+# @Last Modified time: 2022-08-21 11:24:56
 
 import sys
 import os
@@ -100,9 +100,8 @@ class Switchboard(datasets.GeneratorBasedBuilder):
     def manual_download_instructions(self):
         if self.config.name == "ldc-audio":
             return (
-                f""""To use some variants of the Switchboard, you have to download\
-                it manually. The audio is available at {_LDC_AUDIO_CORPUS_URL}.\
-                """
+                f"To use some variants of the Switchboard, you have to download "
+                f"it manually. The audio is available at {_LDC_AUDIO_CORPUS_URL}."
             )
 
     def _info(self):
@@ -124,9 +123,9 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             extracted_path = self.config.data_dir
             if not os.path.isdir(extracted_path):
                 raise FileNotFoundError(
-                    f""""{extracted_path} does not exist. Make sure you insert\
-                    a manual dir via `datasets.load_dataset('matinf', data_dir=...)`\
-                    Manual download instructions: {self.manual_download_instructions}"""
+                    f"{extracted_path} does not exist. Make sure you insert "
+                    f"a manual dir via `datasets.load_dataset('matinf', data_dir=...)` "
+                    f"Manual download instructions: {self.manual_download_instructions}"
                 )
             self.reader = LDCAudioCorpusReader(extracted_path)
         else:

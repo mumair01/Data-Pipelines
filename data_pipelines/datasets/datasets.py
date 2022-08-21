@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:45:40
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-27 09:38:36
+# @Last Modified time: 2022-08-21 11:34:35
 
 import os
 import glob
@@ -17,6 +17,7 @@ from data_pipelines.datasets.switchboard import load_switchboard
 from data_pipelines.datasets.utils import reset_dir
 
 
+# NOTE: Candor and ICC are not yet supported.
 _LOADERS = {
     "callfriend" : load_callfriend,
     "callhome" : load_callhome,
@@ -40,8 +41,10 @@ def load_data(dataset,**kwargs):
     })
     return _LOADERS[dataset](**kwargs)
 
-def get_cache_dir():
+def get_cache_dir() -> str:
+    """Provides the absolute path to the cache dir"""
     return _CACHE_DIR
 
-def get_downloads_dir():
+def get_downloads_dir() -> str:
+    """Provides the absolute path to the download dir"""
     return _DOWNLOADS_DIR

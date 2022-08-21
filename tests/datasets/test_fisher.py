@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 13:31:18
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:20:47
+# @Last Modified time: 2022-08-21 11:05:12
 
 
 import pytest
@@ -29,6 +29,6 @@ def test_fisher():
 
     dataset = load_data(
         dataset="fisher",
-        variant="default"
+        variant="default",
     )
     print(dataset['full'][0])
