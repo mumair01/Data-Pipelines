@@ -28,7 +28,8 @@ dependencies = [
     'torch==1.11.0',
     'tqdm==4.64.0',
     'transformers==4.18.0',
-    'datasets'
+    'datasets==2.4.0',
+    'opensmile==2.4.1'
 ]
 
 
