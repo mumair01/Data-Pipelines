@@ -1,12 +1,253 @@
-# -*- coding: utf-8 -*-
-# @Author: Muhammad Umair
-# @Date:   2022-07-20 13:05:13
-# @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-08-21 11:24:56
+"""
+switchboard.py
+"""
+# Libraries and setup
+import pandas as pd
+import numpy as np
+import re
+from typing import List, Tuple
+import difflib
+# from tqdm import tqdm
+
 
 import sys
 import os
 import glob
+
+from enum import Enum
+from Levenshtein import distance as lev
+
+class Correction(Enum):
+    EXACT_WORD_MATCH = 0
+    REPEATED_OR_DELETED_WORD = 1
+    ALTERNATIVE_TRANSCRIPTION = 2
+    OTHER = 3 
+
+# assumes the word array is more correct and may be longer than the utt array
+# def correct_differences(word_arr: List, utt_arr: List, fallback = None) -> Tuple[List, Correction]:
+#     word_len = len(word_arr)
+#     utt_len = len(utt_arr)
+#     word_diff_list = list(set(word_arr) - set(utt_arr))
+
+#     # there are more/different words in the word list than there are in the utt list
+#     if word_diff_list != []:
+#         # case 1: if the word list has an extra turn in it, and the beginnings are an exact word match
+#         # it means that the numbering in the ms98-a-word file was 
+#         if word_arr[:utt_len] == utt_arr:
+#             # TODO insert new row in speaker_word pandas df with fallback
+#             return (utt_arr, Correction.EXACT_WORD_MATCH)
+
+#         # case 2: check if the lists have a transcription error
+#         else:
+#             for diff in word_diff_list:
+#                 diff_i = word_arr.index(diff) # the index where the diff is found in the original array
+#                 diff_dist = lev(diff, utt_arr[diff_i])
+
+#                 # if the levenstein distance between the target words is small, try running this recursively with 
+#                 if diff_dist <= 3:
+#                     utt_arr = utt_arr[:diff_i - 1] + [diff] + utt_arr[diff_i + 1:]
+            
+#             # if all else fails, just use the word array
+#             return (word_arr, Correction.ALTERNATIVE_TRANSCRIPTION)
+
+#     # no differences in the content of the word arrays
+#     elif word_len != utt_len:
+#         return (word_arr, Correction.REPEATED_OR_DELETED_WORD)
+#     else:
+#         return (word_arr, Correction.EXACT_WORD_MATCH)
+
+# we want to minimize this
+def char_error(word_arr: List[str], utt_arr: List[str]) -> int:
+    # word_len = len(word_arr)
+    # utt_len = len(utt_arr)
+
+    word_set = set(word_arr)
+    utt_set = set(utt_arr)
+    word_diff_list = list(word_set - utt_set) # finds words that are in the current set but not the utterances
+
+    # there may be repetitions or deletions
+    if word_diff_list == []:
+        return 0
+    else:
+        # str_diff = "".join(word_diff_list)
+
+        utt_str = "".join(list(utt_set))
+        word_str = "".join(list(word_set))
+
+        lev_set_difference = lev(utt_str, word_str)
+        return lev_set_difference
+
+# assumes that each candidate list is successively longer than the last
+# and that utt arr is non-empty
+def minimize_char_error(candidate_word_arrs: List[np.ndarray],
+                        utt_arr: List[str],
+                        greedy_mode = True) -> List[str]:
+    
+    # case 1, exact word match
+    # if np.array_equal(utt_arr, candidate_word_arrs[len(utt_arr) - 1]):
+    #     ######
+    #     print(f"exact word")
+    #     ######
+    #     return utt_arr
+
+    # there is an error somewhere
+    best_error = np.inf # defaults to every character is wrong
+    curr_candidate = []
+    has_increased = False
+
+    for word_arr in candidate_word_arrs:
+        curr_error = char_error(word_arr, utt_arr)
+
+        ######
+        # print(f"char_error {curr_error} from {word_arr}")
+        ######
+        if curr_error < best_error:
+            best_error = curr_error
+            curr_candidate = word_arr
+        elif curr_error == best_error and (len(curr_candidate) == 0 or greedy_mode):
+            curr_candidate = word_arr
+        elif (has_increased == True) or (best_error == 0):
+            break # does not expand the search space when the 
+        else:
+            has_increased = True
+    
+    ######
+    # print("candidate", curr_candidate)
+    ######
+    return curr_candidate
+    
+# TODO proper download
+directory = "Transcript_Example/"
+n_transcript = 3097
+utt_path = directory + "1_sw_0614_" + str(n_transcript) + ".utt" # todo deal with reutterizing
+word_A_path = directory + "0_sw" + str(n_transcript)  + "A-ms98-a-word.text"
+word_B_path = directory + "0_sw" + str(n_transcript)  + "B-ms98-a-word.text"
+
+"""
+contains speaker: str, words: List[str],
+    damsl: str, swbd_damsl: str
+with empty cols for start, end, declarative,
+    interrogative, imperative, non-syntactic,
+    function:
+"""
+# def re_utterize(utt_path: str) -> pd.DataFrame:
+#     utt_df = pd.data_frame()
+#     speaker_A_num_utt = 0
+#     speaker_B_num_utt = 0
+#     with open(utt_path, "r", encoding="UTF-8") as utt_file:
+#         print(f"we have {utt_path}")
+
+#     # may be useful for debugging to have output options
+#     # as pd.Dataframe or linguistic consortium file
+#     return utt_df
+
+
+"""
+contains speaker,words,start,end, damsl,swbd_damsl,function information
+with open cols for declarative,interrogative,imperative,non-syntactic,
+"""
+def merge(utt_path: str, word_A_path: str, word_B_path: str) -> None:
+    a_df = pd.read_csv(word_A_path, sep=" ",
+                names=["tcu_num", "start", "end", "words"])
+    b_df = pd.read_csv(word_B_path, sep=" ",
+                names=["tcu_num", "start", "end", "words"])
+    
+
+    # reads utterance file into dataframe
+    # possible more elegant solutions
+    # df_utt = pd.read_fwf(utt_path, sep=" ", skiprows=31, header=0,
+    #         names=["damsl_function", "speaker", "num_continue", "words"])
+    # df_utt = pd.read_csv(utt_path, skiprows=32)
+    # utt_arr = np.loadtxt(utt_path, skiprows=32, dtype=str, delimiter=None)
+    df_utt = pd.DataFrame()
+    with open(utt_path, "r") as utt_file:
+        utt_file = utt_file.readlines()[31:]
+        for line in utt_file:
+            # sanitizes files, based on chas' code
+            def process_line(line):
+                tokens = [word for word in line.strip().split()]
+                speech_act = tokens[0]
+                speaker = tokens[1][0] # assumes speaker is a single character letter
+                turn_num = tokens[1][2:]
+                utt_num = tokens[2][3:-1]
+                words = []
+                for word in tokens[3:]:
+                    if word[-1] != "-":
+                        # We will match abandoned words
+                        # replace is faster than re on string literals
+                        word = word.replace('-', ' ').replace('--', '').replace('#', '')
+                        word = re.sub('{[A-Z]', '', word)
+                        word = re.sub(r'<[a-z]*\>', '', word)
+                        word = re.sub(r'[(),+/?.{}\[\]]', '', word)
+                    if not word.strip() == "":
+                        words.append(word.lower())
+
+                return {"speech_act": speech_act,
+                        "speaker": speaker,
+                        "utt_num": utt_num,
+                        "tcu_num": turn_num,
+                        "words": words}
+
+            new_row = process_line(line)
+            df_utt = df_utt.append(new_row, ignore_index = True)
+    
+    utt_a_df, tcu_b_df = [x for _, x in df_utt.groupby(df_utt["speaker"] == "B")]
+    
+    # looks only at the speaker A timings
+    a_df = a_df[a_df.words != "[silence]"]
+    a_df = a_df[a_df.words != "[noise]"]
+    a_df = a_df[a_df.words != "[laughter]"]
+    a_df["words"] = a_df["words"].str.lower().str.replace('-', ' ') \
+                        .str.replace('--', '').str.replace('#', '')
+    word_a_df = a_df.groupby(['tcu_num'])['words'].apply(list).reset_index()
+
+
+    
+
+    word_arr = a_df["words"].values
+    utt_arr = utt_a_df["words"].values
+    # print(word_arr)
+
+    # this is n^2, and non-pythonic I know...
+    for i in range(len(utt_arr)):
+        utt = utt_arr[i]
+        # testing sanity check
+        if i > 15:
+            break
+
+        candidate = [word_arr[:i] for i in range(1, len(word_arr) + 1)]
+        corrected = minimize_char_error(candidate, utt, not(np.array_equal(utt_arr[i+1], utt)))
+
+        #####
+        print("curr utt", utt) # "next utt", utt_arr[i+1]
+        # print("next turn is same?", np.array_equal(utt_arr[i+1], utt))
+        print("turn result is", corrected)
+        print("")
+        #####
+
+        # queues words that may be used in current word array
+        new_word_arr = []
+        num_corrected = 0
+        for j in range(len(word_arr)):
+            word = word_arr[j]
+            if (num_corrected >= len(corrected)):
+                new_word_arr = np.concatenate((new_word_arr, word_arr[j:]))
+                break
+
+            if word in corrected:
+                num_corrected += 1
+            else:
+                new_word_arr.append(word)
+        word_arr = new_word_arr
+
+    	
+
+
+
+merge(utt_path, word_A_path, word_B_path)
+
+
+
 from dataclasses import dataclass
 
 import datasets
@@ -43,9 +284,9 @@ class SwitchboardConfig(datasets.BuilderConfig):
         self.citation = citation
         self.data_url = data_url
         self.features = features
-
+#
 class Switchboard(datasets.GeneratorBasedBuilder):
-
+#
     BUILDER_CONFIGS = [
         SwitchboardConfig(
             name="isip-aligned",
@@ -93,9 +334,9 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             },
         )
     ]
-
-    ############################ Overridden Methods ##########################
-
+#
+#     ############################ Overridden Methods ##########################
+#
     @property
     def manual_download_instructions(self):
         if self.config.name == "ldc-audio":
@@ -162,3 +403,18 @@ class Switchboard(datasets.GeneratorBasedBuilder):
                     raise NotImplementedError()
 
 
+_DEFAULT_FEATURES = {
+    "id" : Value('string'),
+    "utterances" : [{
+            "speaker" : Value("string"),
+            "start" : Value("float"),
+            "end" : Value("float"),
+            "text" : Value("string"),
+        }
+    ],
+}
+
+_AUDIO_FEATURES = {
+    "id" : Value('string'),
+    "path" : Value("string"),
+}
