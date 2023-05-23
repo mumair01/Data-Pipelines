@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-14 13:20:45
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 09:09:19
+# @Last Modified time: 2023-05-23 10:10:14
 
 import pytest
 from datasets import load_dataset, load_from_disk
@@ -16,7 +16,7 @@ from data_pipelines.datasets import load_data
 def test_maptask():
     # dataset = load_maptask(variant="audio")
     # # Can create the test splits
-    dset = load_data(dataset="maptask", variant="default")
+    dset = load_data(dataset="maptask", variant="audio")
 
     dset_splits = dset["full"].train_test_split(test_size=0.01)
     test_dset = dset_splits["test"]

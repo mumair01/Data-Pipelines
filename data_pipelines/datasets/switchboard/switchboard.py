@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-08-21 11:24:56
+# @Last Modified time: 2023-05-23 10:21:10
 
 import sys
 import os
@@ -127,7 +127,6 @@ class Switchboard(datasets.GeneratorBasedBuilder):
             extracted_path = dl_manager.download_and_extract(
                 self.config.data_url
             )
-            print(extracted_path)
             self.reader = ISIPAlignedCorpusReader(extracted_path)
         elif self.config.name == "ldc-audio":
             extracted_path = self.config.data_dir

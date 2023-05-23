@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:05:16
+# @Last Modified time: 2023-05-23 13:10:43
 
 import os
 import sys
@@ -15,6 +15,7 @@ import shutil
 from sklearn.model_selection import train_test_split
 import json
 import subprocess
+import boto3
 from typing import Any, Dict, List
 
 from data_pipelines.paths import PkgPaths

@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:19:12
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:01:41
+# @Last Modified time: 2023-05-23 10:33:34
 
 import os
 import sys
@@ -41,9 +41,9 @@ class CallFriendDownloader:
         "zho-t",
     )
 
-    _DOWNLOAD_DIR = "."
-    _BASE_TRANS_DOWNLOAD_DIR = os.path.join(_DOWNLOAD_DIR, "transcripts")
-    _BASE_MEDIA_DOWNLOAD_DIR = os.path.join(_DOWNLOAD_DIR, "media")
+    _DOWNLOAD_DIR = "callfriend_download"
+    _BASE_TRANS_DOWNLOAD_DIR = "transcripts"
+    _BASE_MEDIA_DOWNLOAD_DIR = "media"
     _TEMP_DIR = os.path.join(_DOWNLOAD_DIR, "temp")
 
     def __init__(
@@ -68,6 +68,7 @@ class CallFriendDownloader:
         self.media_dir = os.path.join(
             self.download_dir, self._BASE_MEDIA_DOWNLOAD_DIR, language
         )
+
         # Creating the urls
         self.trans_url = self.BASE_TRANS_URL.format(language)
         self.media_url = os.path.join(self.BASE_MEDIA_URL, language)

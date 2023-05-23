@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:35:56
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:00:50
+# @Last Modified time: 2023-05-23 10:42:58
 
 
 import sys
@@ -74,4 +74,8 @@ def get_audio_path(media_root_dir: str, conversation: str) -> str:
 
 def get_conversations(transcription_root_dir: str) -> List[str]:
     """Obtain all the conversation chat file paths"""
-    return glob.glob("{}/*.cha".format(transcription_root_dir))
+    conversations = glob.glob("{}/*.cha".format(transcription_root_dir))
+    # We only want the names of the conversation
+    return [
+        os.path.splitext(os.path.basename(conv))[0] for conv in conversations
+    ]

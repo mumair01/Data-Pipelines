@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:17:02
+# @Last Modified time: 2023-05-23 11:19:44
 
 import os
 
@@ -63,11 +63,11 @@ class CallHome(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         CallHomeConfig(
             name="default",
-            language="eng",
+            language="eng-n",
         ),
         CallHomeConfig(
             name="audio",
-            language="eng",
+            language="eng-n",
         ),
     ]
 
