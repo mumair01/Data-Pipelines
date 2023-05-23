@@ -7,6 +7,7 @@
 
 import torch
 
+
 def z_norm(x):
     """Obtain the z norm"""
     m = x.mean(dim=-2)
