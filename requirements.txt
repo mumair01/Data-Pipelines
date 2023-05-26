@@ -60,11 +60,12 @@ jedi==0.18.2
 Jinja2==3.1.2
 jmespath==1.0.1
 joblib==1.2.0
-keras
+keras==2.13.1rc0
 kiwisolver==1.4.4
 lazy_loader==0.2
 libclang==16.0.0
 librosa==0.10.0.post2
+lightning-utilities==0.8.0
 llvmlite==0.40.0
 Markdown==3.4.3
 MarkupSafe==2.1.2
@@ -105,6 +106,7 @@ Pygments==2.15.1
 pyparsing==3.0.9
 pytest==7.3.1
 python-dateutil==2.8.2
+pytorch-lightning==2.0.2
 pytz==2023.3
 PyYAML==6.0
 regex==2023.5.5
@@ -123,13 +125,13 @@ stack-data==0.6.2
 sympy==1.12
 tensorboard==2.13.0
 tensorboard-data-server==0.7.0
-tensorflow
 termcolor==2.3.0
 threadpoolctl==3.1.0
 tokenizers==0.13.3
 toml==0.10.2
 tomli==2.0.1
 torch==2.0.1
+torchmetrics==0.11.4
 tqdm==4.65.0
 traitlets==5.9.0
 transformers==4.29.2

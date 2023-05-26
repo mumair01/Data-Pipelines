@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2023-05-23 09:29:23
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:03:54
+# @Last Modified time: 2023-05-26 11:24:33
 
 
 import os
@@ -18,8 +18,8 @@ _CACHE_DIR = os.path.join(
     os.path.expanduser("~"), ".cache/data_pipelines/datasets"
 )
 _DOWNLOADS_DIR = os.path.join(_CACHE_DIR, "downloads")
-_CONFIGS_DIR = os.path.join(_ROOT_PATH, "configs")
-_BIN_DIR = os.path.join(_ROOT_PATH, "bin")
+_CONFIGS_DIR = os.path.join(_MODULE_PATH, "configs")
+_BIN_DIR = os.path.join(_MODULE_PATH, "bin")
 
 
 #### Exe paths

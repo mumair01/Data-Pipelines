@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-07 16:44:55
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:04:24
+# @Last Modified time: 2023-05-26 10:32:06
 
 
 import os
@@ -102,6 +102,7 @@ class OpenSmile:
         if feature_set == "egemapsv02_default":
             return opensmile.FeatureSet.eGeMAPSv02
         elif feature_set == "egemapsv02_50ms":
+            print(_EGEMAPS_V02_50MS_CONF)
             assert os.path.isfile(_EGEMAPS_V02_50MS_CONF)
             return _EGEMAPS_V02_50MS_CONF
         elif feature_set == "emobase":
