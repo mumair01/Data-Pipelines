@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 16:58:36
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 13:10:43
+# @Last Modified time: 2023-05-26 12:46:00
 
 import os
 import sys
@@ -17,6 +17,8 @@ import json
 import subprocess
 import boto3
 from typing import Any, Dict, List
+import boto3
+import botocore
 
 from data_pipelines.paths import PkgPaths
 
@@ -111,6 +113,45 @@ def extract_from_zip(zip_file_path, output_dir):
         # Extract all the contents of zip file in different directory
         os.makedirs(output_dir, exist_ok=True)
         zipObj.extractall(output_dir)
+
+
+### AWS DOWNLOAD UTILS
+
+
+def download_s3_folder(bucket_name, s3_folder, local_dir=None):
+    """
+    Download the contents of a folder directory
+    Args:
+        bucket_name: the name of the s3 bucket
+        s3_folder: the folder path in the s3 bucket
+        local_dir: a relative or absolute directory path in the local file system
+    """
+    s3 = boto3.resource(
+        "s3"
+    )  # assumes credentials & configuration are handled outside python in .aws directory or environment variables
+
+    bucket = s3.Bucket(bucket_name)
+    for obj in bucket.objects.filter(Prefix=s3_folder):
+        target = (
+            obj.key
+            if local_dir is None
+            else os.path.join(local_dir, os.path.relpath(obj.key, s3_folder))
+        )
+        if not os.path.exists(os.path.dirname(target)):
+            os.makedirs(os.path.dirname(target))
+        if obj.key[-1] == "/":
+            continue
+        bucket.download_file(obj.key, target)
+
+
+def download_s3_file(bucket_name: str, s3_key: str, local_path: str):
+    s3 = boto3.resource(
+        "s3"
+    )  # assumes credentials & configuration are handled outside python in .aws directory or environment variables
+    try:
+        s3.Bucket(bucket_name).download_file(s3_key, local_path)
+    except botocore.exceptions.ClientError as e:
+        print(e.response)
 
 
 ######################## AUDIO MANIPULATION UTILS ##########################
