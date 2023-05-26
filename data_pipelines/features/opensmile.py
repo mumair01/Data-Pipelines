@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-07 16:44:55
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:44:43
+# @Last Modified time: 2023-05-26 10:32:06
 
 
 import os
@@ -13,12 +13,11 @@ import audiofile
 import torch
 from typing import Dict
 
-from data_pipelines.utils import get_module_path
+from data_pipelines.paths import PkgPaths
 from data_pipelines.features.utils import z_norm, z_norm_non_zero
 
 
-_EGEMAPS_V02_50MS_CONF = os.path.join(
-    get_module_path(),"configs/opensmile/pyopensmile/egemaps_v02_custom/egemaps_v02_50ms/eGeMAPSv02.conf")
+_EGEMAPS_V02_50MS_CONF = PkgPaths.Egemaps.v02_50ms_conf
 
 
 class OpenSmile:
@@ -31,10 +30,14 @@ class OpenSmile:
 
     _SMILE_EXTRACT_CMD = "SMILExtract -C {} -I {} -D {}"
 
-    def __init__(self, feature_set="egemapsv02_default",
-            feature_level="lld",
-            sample_rate=16_000, normalize=False,
-            use_smile=False,):
+    def __init__(
+        self,
+        feature_set="egemapsv02_default",
+        feature_level="lld",
+        sample_rate=16_000,
+        normalize=False,
+        use_smile=False,
+    ):
         """
         Args:
             feature_set (str): Feature set to extract.
@@ -52,9 +55,8 @@ class OpenSmile:
         self.use_smile = use_smile
         feature_set = self.get_feature_set(feature_set)
         self.smile = opensmile.Smile(
-            feature_set=feature_set,
-            feature_level=feature_level)
-
+            feature_set=feature_set, feature_level=feature_level
+        )
 
     @property
     def feat2idx(self):
@@ -69,8 +71,10 @@ class OpenSmile:
         return self.smile.feature_names
 
     def _settings(self):
-        if self.feature_set_name == "egemapsv02_default" or \
-                self.feature_set_name == "egemapsv02_50ms":
+        if (
+            self.feature_set_name == "egemapsv02_default"
+            or self.feature_set_name == "egemapsv02_50ms"
+        ):
             self.pad_samples = int(self.sample_rate * 0.02)
             self.pad_frames = 2
             self.f0_idx = 10
@@ -98,6 +102,7 @@ class OpenSmile:
         if feature_set == "egemapsv02_default":
             return opensmile.FeatureSet.eGeMAPSv02
         elif feature_set == "egemapsv02_50ms":
+            print(_EGEMAPS_V02_50MS_CONF)
             assert os.path.isfile(_EGEMAPS_V02_50MS_CONF)
             return _EGEMAPS_V02_50MS_CONF
         elif feature_set == "emobase":
@@ -113,10 +118,8 @@ class OpenSmile:
             # TODO: Implement this at some point for compatibility.
             raise NotImplementedError()
         else:
-            data =self.smile.process_signal(waveform, self.sample_rate)
-            f = torch.from_numpy(
-                data.to_numpy()
-            )
+            data = self.smile.process_signal(waveform, self.sample_rate)
+            f = torch.from_numpy(data.to_numpy())
             if self.normalize:
                 fr = z_norm(f[..., self.idx_reg])
                 fs = z_norm_non_zero(f[..., self.idx_special])
@@ -128,38 +131,40 @@ class OpenSmile:
             return f
 
     def use_smile_extract(self, audio_path, output_dir):
-
         assert os.path.isdir(output_dir), "Output directory must exist"
         assert os.path.isfile(audio_path), "Audio path must exist"
-        assert os.path.isfile(self.feature_set) and \
-                os.path.splitext(os.path.basename(self.feature_set))[1] == ".conf", \
-                    "Feature set must be a .conf configuration"
+        assert (
+            os.path.isfile(self.feature_set)
+            and os.path.splitext(os.path.basename(self.feature_set))[1]
+            == ".conf"
+        ), "Feature set must be a .conf configuration"
         filename, _ = os.path.splitext(os.path.basename(audio_path))
-        csv_path =os.path.join(output_dir,
-                "{}_{}.csv".format(
-                    filename, os.path.splitext(os.path.basename(self.feature_set))))
+        csv_path = os.path.join(
+            output_dir,
+            "{}_{}.csv".format(
+                filename, os.path.splitext(os.path.basename(self.feature_set))
+            ),
+        )
         try:
             cmd = self.SMILE_EXTRACT_CMD.format(
-                self.feature_set,audio_path,csv_path)
+                self.feature_set, audio_path, csv_path
+            )
             subprocess.run(cmd, shell=True)
         except:
             pass
 
-def extract_feature_set(audio_path : str, feature_set : str) -> Dict :
+
+def extract_feature_set(audio_path: str, feature_set: str) -> Dict:
     """
     Convenience method for extracting audio features of the given feature set.
     Use OpenSmile directly if this does not cover all cases
     """
-    signal, sampling_rate = audiofile.read(audio_path,always_2d=True)
+    signal, sampling_rate = audiofile.read(audio_path, always_2d=True)
     smile = OpenSmile(
         feature_set=feature_set,
         feature_level="lld",
         sample_rate=sampling_rate,
-        normalize=False)
+        normalize=False,
+    )
     f = smile(signal)
-    return {
-        "values" : f,
-        "features" : list(smile.idx2feat.values())
-    }
-
-
+    return {"values": f, "features": list(smile.idx2feat.values())}

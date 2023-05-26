@@ -11,12 +11,11 @@ import glob
 import datasets
 from datasets import Value, Audio, Array3D
 
-from data_pipelines.datasets.callhome.download import (
-    CallHomeDownloader
-)
+from data_pipelines.datasets.callhome.download import CallHomeDownloader
 
 from data_pipelines.datasets.callhome.utils import (
-    get_utterances, get_audio_path
+    get_utterances,
+    get_audio_path,
 )
 
 _CALLHOME_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC97S42"
@@ -33,40 +32,41 @@ _CALLHOME_CITATION = """\
 """
 
 _DEFAULT_FEATURES = {
-    "id" : Value('string'),
-    "utterances" : [{
-            "speaker" : Value("string"),
-            "start" : Value("float"),
-            "end" : Value("float"),
-            "text" : Value("string"),
+    "id": Value("string"),
+    "utterances": [
+        {
+            "speaker": Value("string"),
+            "start": Value("float"),
+            "end": Value("float"),
+            "text": Value("string"),
         }
     ],
 }
 
 _AUDIO_FEATURES = {
-    "id" : Value('string'),
-    "path" : Value("string"),
+    "id": Value("string"),
+    "path": Value("string"),
 }
 
 
 class CallHomeConfig(datasets.BuilderConfig):
-    def __init__(self,language, **kwargs):
+    def __init__(self, language, **kwargs):
         super().__init__(**kwargs)
         self.language = language
 
-class CallHome(datasets.GeneratorBasedBuilder):
 
+class CallHome(datasets.GeneratorBasedBuilder):
     _CACHE_DIR = "callhome"
 
     BUILDER_CONFIGS = [
         CallHomeConfig(
             name="default",
-            language='eng',
+            language="eng",
         ),
-         CallHomeConfig(
+        CallHomeConfig(
             name="audio",
-            language='eng',
-        )
+            language="eng",
+        ),
     ]
 
     ############################ Overridden Methods ##########################
@@ -74,33 +74,40 @@ class CallHome(datasets.GeneratorBasedBuilder):
     def _info(self):
         return datasets.DatasetInfo(
             description=_CALLHOME_DESCRIPTION,
-            citation=_CALLHOME_CITATION ,
+            citation=_CALLHOME_CITATION,
             homepage=_CALLHOME_HOMEPAGE,
-            features=datasets.Features(_DEFAULT_FEATURES \
-                if self.config.name == 'default' else _AUDIO_FEATURES)
+            features=datasets.Features(
+                _DEFAULT_FEATURES
+                if self.config.name == "default"
+                else _AUDIO_FEATURES
+            ),
         )
 
-    def _split_generators(self, dl_manager : datasets.DownloadManager):
+    def _split_generators(self, dl_manager: datasets.DownloadManager):
         # Download the corpus
         dataset_dir = os.path.join(
-            dl_manager.download_config.cache_dir,self._CACHE_DIR)
+            dl_manager.download_config.cache_dir, self._CACHE_DIR
+        )
         downloader = CallHomeDownloader(
             output_dir=dataset_dir,
             language=self.config.language,
-            force_download=dl_manager.download_config.force_download)
+            force_download=dl_manager.download_config.force_download,
+        )
         self.download_paths = downloader()
         # Generate the data splits
-        tmp_path = os.path.join(dataset_dir,"splits")
-        os.makedirs(tmp_path,exist_ok=True)
-        conversations = glob.glob("{}/*.cha".format(
-            self.download_paths.transcriptions_dir))
+        tmp_path = os.path.join(dataset_dir, "splits")
+        os.makedirs(tmp_path, exist_ok=True)
+        conversations = glob.glob(
+            "{}/*.cha".format(self.download_paths.transcriptions_dir)
+        )
         # Obtain the conversations
-        conversations = [os.path.splitext(os.path.basename(conv))[0] \
-            for conv in conversations]
+        conversations = [
+            os.path.splitext(os.path.basename(conv))[0]
+            for conv in conversations
+        ]
         return [
             datasets.SplitGenerator(
-                name="full",
-                gen_kwargs={"conversations" : conversations}
+                name="full", gen_kwargs={"conversations": conversations}
             )
         ]
 
@@ -109,22 +116,19 @@ class CallHome(datasets.GeneratorBasedBuilder):
             if self.config.name == "default":
                 # Get the utterances
                 utterances = get_utterances(
-                    self.download_paths.transcriptions_dir,conversation)
-                yield f"{conversation}",{
-                    "id" : conversation,
-                    "utterances" : utterances
+                    self.download_paths.transcriptions_dir, conversation
+                )
+                yield f"{conversation}", {
+                    "id": conversation,
+                    "utterances": utterances,
                 }
             elif self.config.name == "audio":
                 path = get_audio_path(
-                    self.download_paths.media_dir,conversation)
+                    self.download_paths.media_dir, conversation
+                )
                 if not os.path.isfile(path):
                     continue
-                yield f"{conversation}",{
-                    "id" : conversation,
-                    "path" : path,
+                yield f"{conversation}", {
+                    "id": conversation,
+                    "path": path,
                 }
-
-
-
-
-

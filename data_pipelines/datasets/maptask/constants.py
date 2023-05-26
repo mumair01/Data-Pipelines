@@ -60,7 +60,7 @@ POS_TAGS = [
     "ppss",
     "ppo",
     "ppl",
-    "ppg2\"",
+    'ppg2"',
     "pr",
     "pn",
     "in",
@@ -72,5 +72,5 @@ POS_TAGS = [
     "noi",
     "pau",
     "frag",
-    "sent"
+    "sent",
 ]
