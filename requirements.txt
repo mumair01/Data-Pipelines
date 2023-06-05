@@ -30,3 +30,4 @@ termcolor==2.3.0
 toml==0.10.2
 transformers==4.29.2
 wrapt==1.14.1
+pyarrow==11.0.0
