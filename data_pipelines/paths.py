@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2023-05-23 09:29:23
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-06 10:39:45
+# @Last Modified time: 2023-06-07 11:48:19
 
 
 """
@@ -21,11 +21,12 @@ _ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 # Path to the data_pipelines package
 _MODULE_PATH = os.path.dirname(__file__)
 # Directory used to cache datasets.
+_CACHE_ROOT = os.path.join(os.path.expanduser("~"), ".cache/data_pipelines")
 _CACHE_DIR = os.path.join(
     os.path.expanduser("~"), ".cache/data_pipelines/datasets"
 )
 # Directory used to store temporary files when downloading datasets.
-_DOWNLOADS_DIR = os.path.join(_CACHE_DIR, "downloads")
+_DOWNLOADS_DIR = os.path.join(_CACHE_ROOT, "downloads")
 # Path to the configuration directory, which contains, amongst other things,
 # configs for the opensmile package.
 _CONFIGS_DIR = os.path.join(_MODULE_PATH, "configs")
