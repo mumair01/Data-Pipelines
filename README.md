@@ -29,6 +29,9 @@ might not be publicly available.
 
 ## Getting Started
 
+
+**IMPORTANT**: This repository only works on the i386 architecture on Mac OSX, not the arm64 architecture used in the newer Macs. 
+
 The first step is to install data pipelines as a python package that can be
 imported in python scripts. There is no pypi registry for this project.
 Instead, it can be directly installed from Github as a package using pip.
@@ -49,13 +52,23 @@ ipython
 import data_pipelines
 ```
 
+To install in developer mode, install the dev dependencies using:
+```bash
+pip install git+https://github.com/mumair01/Data-Pipelines.git '.[dev]'
+```
+
 ## Basic Usage
 
-Datasets can loaded using the load_data method by specifying the name of the dataset, the variant, and any required keyword arguments.
+This package provides two sub-packages: datasets and features. The datasets sub-package contains methods for loading and manipulating datasets, while the features sub-package provides more advanced feature extraction methods (e.g, audio feature extraction using OpenSmile).  
+
+
+The DataPipeline class provides all methods required to access datasets. Datasets can loaded using the load_data method by specifying the name of the dataset, the variant, and any required keyword arguments.
 
 ```python
-from data_pipelines.datasets import load_data
-dataset = load_data(
+from data_pipelines.datasets import DataPipeline
+
+dp = DataPipeline()
+dset = dp.load_data(
     dataset=<DATASET_NAME>,
     variant=<DATASET_VARIANT,
     **kwargs
@@ -347,19 +360,21 @@ The Features sub-package provides access to methods that may be used for these p
 
 The datasets this project deals with are large and require a large amount of memory to store. This project aims to download a single copy of these datasets that may be used across projects. However, there may be times when this data must be deleted to free up space.
 
-We do not provide methods to do this directly - as this may accidentally delete cache files. Instead, we provide access to the download and cache folder paths such that they may be deleted manually.
 
 ```python
-def get_cache_dir() -> str:
-    """Provides the absolute path to the cache dir"""
-    return _CACHE_DIR
 
-def get_downloads_dir() -> str:
-    """Provides the absolute path to the download dir"""
-    return _DOWNLOADS_DIR
+from data_pipelines.datasets import DataPipeline
+
+dp = DataPipeline()
+# Remove all the cached datasets.
+dp.clear_cache()
+# Remove all the downloaded datasets.
+dp.clear_downloads()
 ```
 
 ## Acknowledgements
 
+Developed by [Muhammad Umair](https://www.linkedin.com/in/mumair/) at the [Human Interaction Lab](https://sites.tufts.edu/hilab/) at Tufts University, Medford, MA. 
+ 
 This project uses the [transformers library](https://aclanthology.org/2020.emnlp-demos.6/)
 and was inspired by Erik's [datasets_turntaking project](https://github.com/ErikEkstedt/datasets_turntaking).
