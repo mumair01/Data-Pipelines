@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:19:12
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:33:34
+# @Last Modified time: 2023-06-06 11:06:53
 
 import os
 import sys
@@ -19,6 +19,17 @@ from data_pipelines.datasets.utils import (
 
 @dataclass
 class DownloadPaths:
+    """
+    Relevant paths from the downloaded corpus
+
+    Attributes
+    ----------
+    transcription_dir : str
+        Path to the directory containing the transcribed files.
+    media_dir : str
+        Path to directory containing the underlying audio files for the corpus
+    """
+
     transcriptions_dir: str
     media_dir: str
 
@@ -88,11 +99,16 @@ class CallFriendDownloader:
         )
 
     def __download_transcripts(self):
+        """
+        Downloads the transcripts only - since they are from a unique url.
+        """
         reset_dir(self.trans_dir)
         download_zip_from_url(self.trans_url, self.trans_dir)
 
     def __download_media(self):
-        """Scrapes callfriend website for all media files and downloads."""
+        """
+        Scrapes callfriend website for all media files and downloads
+        """
         # Scare the website for the audio filenames
         http = urllib3.PoolManager()
         resp = http.request("GET", self.media_url)

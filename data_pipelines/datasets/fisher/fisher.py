@@ -2,13 +2,23 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-08-21 11:04:44
+# @Last Modified time: 2023-06-07 11:21:53
+
+"""
+This script contains custom dataset implementation for the Fisher corpus 
+using the datasets.BuilderConfig and datasets.GeneratorBasedBuilder objects. 
+Link: https://huggingface.co/docs/datasets/package_reference/builder_classes
+
+"""
+
+
 import sys
 import os
 import glob
 
 import datasets
 from datasets import Value
+from typing import Dict
 
 from data_pipelines.datasets.fisher.readers import (
     LDCTranscriptsReader,
@@ -63,7 +73,36 @@ _AUDIO_FEATURES = {
 
 
 class FisherConfig(datasets.BuilderConfig):
-    def __init__(self, homepage, description, features, **kwargs):
+    """
+    Base class for DatasetBuilder data configuration.
+
+    DatasetBuilder subclasses with data configuration options should subclass
+    BuilderConfig and add their own properties.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.BuilderConfig
+    """
+
+    def __init__(
+        self, homepage: str, description: str, features: Dict, **kwargs
+    ):
+        """
+        Configuration for the Fisher corpus, which are used to build the
+        dataset.
+        Accepts additional kwargs that may be accepted by any dataset
+        https://huggingface.co/docs/datasets/package_reference/loading_methods
+
+
+
+        Parameters
+        ----------
+        homepage : str
+            Link to the homepage for the corpus variant.
+        description : str
+            Corpus variant specific description.
+        features : Dict
+            Dictionary representing the features that a specific corpus variant
+            provides.
+        """
         super().__init__(**kwargs)
         self.homepage = homepage
         self.description = description
@@ -71,6 +110,17 @@ class FisherConfig(datasets.BuilderConfig):
 
 
 class Fisher(datasets.GeneratorBasedBuilder):
+    """
+    Base class for datasets with data generation based on dict generators.
+
+    GeneratorBasedBuilder is a convenience class that abstracts away much of
+    the data writing and reading of DatasetBuilder. It expects subclasses to
+    implement generators of feature dictionaries across the dataset splits
+    (_split_generators). See the method docstrings for details.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.DatasetBuilder
+    """
+
     BUILDER_CONFIGS = [
         FisherConfig(
             name="default",
@@ -88,6 +138,10 @@ class Fisher(datasets.GeneratorBasedBuilder):
 
     @property
     def manual_download_instructions(self):
+        """
+        String representation of the instructions required to download corpora
+        that must be manually specified to construct into a dataaset.
+        """
         return (
             f"To use Fisher you have to download it manually. The transcripts "
             f"can be downloaded from {_FISHER_LDC_TRANSCRIPTS_URL} and the audio "

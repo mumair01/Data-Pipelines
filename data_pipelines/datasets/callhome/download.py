@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:39:35
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:04:35
+# @Last Modified time: 2023-06-07 11:10:50
 
 import os
 import sys
@@ -19,6 +19,17 @@ from data_pipelines.datasets.utils import (
 
 @dataclass
 class DownloadPaths:
+    """
+    Relevant paths from the downloaded corpus
+
+    Attributes
+    ----------
+    transcription_dir : str
+        Path to the directory containing the transcribed files.
+    media_dir : str
+        Path to directory containing the underlying audio files for the corpus
+    """
+
     transcriptions_dir: str
     media_dir: str
 

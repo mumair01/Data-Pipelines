@@ -2,13 +2,17 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:09:36
+# @Last Modified time: 2023-06-07 11:11:48
 
 import sys
 import os
 import re
 from glob import glob
 from typing import List, Dict
+
+"""
+Contains utilities for loading the callhome corpus specifically. 
+"""
 
 
 def get_utterances(transcription_root_dir: str, conversation: str) -> Dict:

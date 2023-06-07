@@ -33,6 +33,7 @@ dev = [
     "pytest-cov",
     "pytest-timeout",
     "pytest-xdist",
+    "ipython"
 ]
 
 
