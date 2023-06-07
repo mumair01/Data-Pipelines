@@ -2,14 +2,9 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 13:02:11
+# @Last Modified time: 2023-06-07 11:14:42
 
 
-from data_pipelines.datasets.fisher.loader import load_fisher
-from dataclasses import dataclass
-
-
-@dataclass
-class FisherVariants:
-    DEFAULT: str = "default"
-    AUDIO: str = "audio"
+# All dataset packages must export a loader function and a list of supported
+# variants
+from data_pipelines.datasets.fisher.loader import load_fisher, VARIANTS, DETAILS

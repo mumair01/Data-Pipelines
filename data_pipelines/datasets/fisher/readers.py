@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 12:13:39
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:19:45
+# @Last Modified time: 2023-06-07 11:19:02
 
 
 import os
@@ -16,6 +16,10 @@ from collections import defaultdict
 
 from data_pipelines.datasets.utils import get_subdirs, sph2pipe
 from typing import Dict, List
+
+"""
+Contains classes that are able to parse specific variants of the Fisher corpus. 
+"""
 
 
 class LDCTranscriptsReader:

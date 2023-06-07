@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 11:49:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 11:11:30
+# @Last Modified time: 2023-06-07 11:18:21
 
 
 import os
@@ -22,7 +22,7 @@ VARIANTS = ("default", "audio")
 # Dictionary listing the details for this dataset that should be exposed to the
 # user.
 DETAILS = {
-    "name": "Callhome",
+    "name": "Callfriend",
     "variants": VARIANTS,
     "additional kwargs": {"languages": _LANGUAGES},
 }
