@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2023-06-07 12:03:10
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 13:24:16
+# @Last Modified time: 2023-06-07 19:42:35
 
 import pytest
 
@@ -15,47 +15,71 @@ import data_pipelines.features as dpf
 _SAVE_DIR = "tests/test_results"
 
 
-def test_dset_variants():
+@pytest.mark.parametrize(
+    "dataset",
+    ["callfriend", "callhome", "fisher", "maptask", "switchboard"],
+)
+def test_dset_variants(dataset):
+    print(dataset)
     dp = DataPipeline()
-    datasets = dp.supported_dsets()
-    for dataset in datasets:
-        assert isinstance(dp.dset_variants(dataset), list)
+    print(dp.dset_variants(dataset))
+    assert isinstance(dp.dset_variants(dataset), list)
 
 
-def test_dset_details():
+@pytest.mark.parametrize(
+    "dataset",
+    ["callfriend", "callhome", "fisher", "maptask", "switchboard"],
+)
+def test_dset_details(dataset):
     dp = DataPipeline()
-    datasets = dp.supported_dsets()
-    for dataset in datasets:
-        assert isinstance(dp.dset_details(dataset), dict)
+    assert isinstance(dp.dset_details(dataset), dict)
 
 
-def test_clear_cache():
+@pytest.mark.parametrize(
+    "dataset, variant",
+    [
+        ("callfriend", "default"),
+        ("callfriend", "audio"),
+        ("callhome", "default"),
+        ("callhome", "audio"),
+        ("fisher", "default"),
+        ("fisher", "audio"),
+        ("maptask", "default"),
+        ("maptask", "audio"),
+        ("switchboard", "isip-aligned"),
+        ("switchboard", "swda"),
+        ("switchboard", "ldc-audio"),
+    ],
+)
+def test_load(dataset, variant):
     dp = DataPipeline()
-    dp.clear_cache()
+    dset = dp.load_dset(dataset=dataset, variant=variant)
+    assert isinstance(dset, datasets.dataset_dict.DatasetDict)
 
 
-def test_load():
+@pytest.mark.parametrize(
+    "dataset, variant",
+    [
+        ("callfriend", "default"),
+        ("callfriend", "audio"),
+        ("callhome", "default"),
+        ("callhome", "audio"),
+        ("fisher", "default"),
+        ("fisher", "audio"),
+        ("maptask", "default"),
+        ("maptask", "audio"),
+        ("switchboard", "isip-aligned"),
+        ("switchboard", "swda"),
+        ("switchboard", "ldc-audio"),
+    ],
+)
+def test_save_and_load_from_disk(dataset, variant):
     dp = DataPipeline()
-    datasets = dp.supported_dsets()
-    for dataset in datasets:
-        variants = dp.dset_variants(dataset)
-        for variant in variants:
-            dset = dp.load_dset(dataset=dataset, variant=variant)
-            assert isinstance(dset, datasets.dataset_dict.DatasetDict)
-
-
-def test_save_and_load_from_disk():
-    dp = DataPipeline()
-    datasets = dp.supported_dsets()
-    for dataset in datasets:
-        variants = dp.dset_variants(dataset)
-        for variant in variants:
-            dset = dp.load_dset(dataset=dataset, variant=variant)
-            dset = dp.load_dset(dataset=dataset, variant=variant)
-            dataset_path = f"{_SAVE_DIR}/{dataset}_{variant}"
-            dset.save_to_disk(dataset_path)
-            dset = load_from_disk(dataset_path)
-            assert isinstance(dset, datasets.dataset_dict.DatasetDict)
+    dset = dp.load_dset(dataset=dataset, variant=variant)
+    dataset_path = f"{_SAVE_DIR}/{dataset}_{variant}"
+    dset.save_to_disk(dataset_path)
+    dset = load_from_disk(dataset_path)
+    assert isinstance(dset, datasets.dataset_dict.DatasetDict)
 
 
 def test_extract_audio_dset_features():
