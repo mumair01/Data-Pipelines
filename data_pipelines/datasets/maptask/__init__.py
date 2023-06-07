@@ -2,13 +2,12 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-11 17:55:59
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 13:02:49
+# @Last Modified time: 2023-06-07 11:20:53
 
-from data_pipelines.datasets.maptask.loader import load_maptask
-from dataclasses import dataclass
-
-
-@dataclass
-class MaptaskVariants:
-    DEFAULT: str = "default"
-    AUDIO: str = "audio"
+# All dataset packages must export a loader function and a list of supported
+# variants
+from data_pipelines.datasets.maptask.loader import (
+    load_maptask,
+    VARIANTS,
+    DETAILS,
+)

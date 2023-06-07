@@ -2,10 +2,10 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-22 11:56:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 11:17:53
+# @Last Modified time: 2023-06-07 11:21:53
 
 """
-This script contains custom dataset implementation for the Callfriend corpus 
+This script contains custom dataset implementation for the Fisher corpus 
 using the datasets.BuilderConfig and datasets.GeneratorBasedBuilder objects. 
 Link: https://huggingface.co/docs/datasets/package_reference/builder_classes
 
