@@ -2,7 +2,15 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 11:19:44
+# @Last Modified time: 2023-06-07 11:07:42
+
+
+"""
+This script contains custom dataset implementation for the Callfriend corpus 
+using the datasets.BuilderConfig and datasets.GeneratorBasedBuilder objects. 
+Link: https://huggingface.co/docs/datasets/package_reference/builder_classes
+
+"""
 
 import os
 
@@ -16,6 +24,7 @@ from data_pipelines.datasets.callfriend.utils import (
     get_audio_path,
     get_conversations,
 )
+
 
 _CALLFRIEND_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC96S46"
 _CALLFRIEND_DESCRIPTION = """\
@@ -51,21 +60,52 @@ _AUDIO_FEATURES = {
 }
 
 
-class CallHomeConfig(datasets.BuilderConfig):
-    def __init__(self, language, **kwargs):
+class CallFriendConfig(datasets.BuilderConfig):
+    """
+    Base class for DatasetBuilder data configuration.
+
+    DatasetBuilder subclasses with data configuration options should subclass
+    BuilderConfig and add their own properties.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.BuilderConfig
+    """
+
+    def __init__(self, language: str, **kwargs):
+        """
+        Configuration for the Callfriend corpus, which are used to build the
+        dataset.
+        Accepts additional kwargs that may be accepted by any dataset
+        https://huggingface.co/docs/datasets/package_reference/loading_methods
+
+        Parameters
+        ----------
+        language : str
+            Language for the callfriend corpus
+        """
         super().__init__(**kwargs)
         self.language = language
 
 
-class CallHome(datasets.GeneratorBasedBuilder):
+class CallFriend(datasets.GeneratorBasedBuilder):
+    """
+    Base class for datasets with data generation based on dict generators.
+
+    GeneratorBasedBuilder is a convenience class that abstracts away much of
+    the data writing and reading of DatasetBuilder. It expects subclasses to
+    implement generators of feature dictionaries across the dataset splits
+    (_split_generators). See the method docstrings for details.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.DatasetBuilder
+    """
+
     _CACHE_DIR = "callfriend"
 
     BUILDER_CONFIGS = [
-        CallHomeConfig(
+        CallFriendConfig(
             name="default",
             language="eng-n",
         ),
-        CallHomeConfig(
+        CallFriendConfig(
             name="audio",
             language="eng-n",
         ),

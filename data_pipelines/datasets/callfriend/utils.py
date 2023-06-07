@@ -2,8 +2,12 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-21 16:35:56
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:42:58
+# @Last Modified time: 2023-06-07 11:08:15
 
+
+"""
+Contains utilities for loading the callfriend corpus specifically. 
+"""
 
 import sys
 import os
