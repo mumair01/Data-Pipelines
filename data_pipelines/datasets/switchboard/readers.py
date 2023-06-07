@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:24:16
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 14:29:26
+# @Last Modified time: 2023-06-07 11:28:06
 
 import os
 import sys
@@ -14,6 +14,11 @@ import glob
 import re
 
 from data_pipelines.datasets.utils import sph2pipe
+
+
+"""
+Contains classes that are able to parse specific variants of the Switchboard corpus. 
+"""
 
 
 class LDCAudioCorpusReader:

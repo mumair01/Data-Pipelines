@@ -2,7 +2,14 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 13:05:13
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:21:10
+# @Last Modified time: 2023-06-07 11:27:48
+
+"""
+This script contains custom dataset implementation for the Switchboard corpus 
+using the datasets.BuilderConfig and datasets.GeneratorBasedBuilder objects. 
+Link: https://huggingface.co/docs/datasets/package_reference/builder_classes
+
+"""
 
 import sys
 import os
@@ -16,6 +23,8 @@ from data_pipelines.datasets.switchboard.readers import (
     ISIPAlignedCorpusReader,
     LDCAudioCorpusReader,
 )
+
+from typing import Dict
 
 
 _LDC_HOMEPAGE = "https://catalog.ldc.upenn.edu/LDC97S62"
@@ -36,9 +45,46 @@ _LDC_AUDIO_CORPUS_URL = "https://catalog.ldc.upenn.edu/LDC97S62"
 
 
 class SwitchboardConfig(datasets.BuilderConfig):
+    """
+    Base class for DatasetBuilder data configuration.
+
+    DatasetBuilder subclasses with data configuration options should subclass
+    BuilderConfig and add their own properties.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.BuilderConfig
+    """
+
     def __init__(
-        self, homepage, description, citation, data_url, features, **kwargs
+        self,
+        homepage: str,
+        description: str,
+        citation: str,
+        data_url: str,
+        features: Dict,
+        **kwargs,
     ):
+        """
+        Configuration for the Switchboard corpus, which are used to build the
+        dataset.
+        Accepts additional kwargs that may be accepted by any dataset
+        https://huggingface.co/docs/datasets/package_reference/loading_methods
+
+
+        Parameters
+        ----------
+        homepage : str
+            Link to the homepage for the corpus variant.
+        description : str
+            Corpus variant specific description.
+        citation : str
+            Citation for the corpus variant
+        data_url : str
+            URL for the corpus variant where it can be downloaded from. Empty
+            string if there is no download link.
+        features : Dict
+            Dictionary representing the features that a specific corpus variant
+            provides.
+        """
         super().__init__(**kwargs)
         self.homepage = homepage
         self.description = description
@@ -48,6 +94,17 @@ class SwitchboardConfig(datasets.BuilderConfig):
 
 
 class Switchboard(datasets.GeneratorBasedBuilder):
+    """
+    Base class for datasets with data generation based on dict generators.
+
+    GeneratorBasedBuilder is a convenience class that abstracts away much of
+    the data writing and reading of DatasetBuilder. It expects subclasses to
+    implement generators of feature dictionaries across the dataset splits
+    (_split_generators). See the method docstrings for details.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.DatasetBuilder
+    """
+
     BUILDER_CONFIGS = [
         SwitchboardConfig(
             name="isip-aligned",
