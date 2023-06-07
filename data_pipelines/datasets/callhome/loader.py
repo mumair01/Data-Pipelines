@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-20 11:49:49
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-05-23 10:06:53
+# @Last Modified time: 2023-06-07 11:11:30
 
 
 import os
@@ -15,8 +15,17 @@ _DATASET_LOADING_SCRIPT = os.path.join(
     PkgPaths.Core.datasetsMod, "callhome", "callhome.py"
 )
 
-_VARIANTS = ("default", "audio")
 _LANGUAGES = "ara", "deu", "eng", "jpn", "spa", "zho"
+
+VARIANTS = ("default", "audio")
+
+# Dictionary listing the details for this dataset that should be exposed to the
+# user.
+DETAILS = {
+    "name": "Callhome",
+    "variants": VARIANTS,
+    "additional kwargs": {"languages": _LANGUAGES},
+}
 
 
 def load_callhome(variant="default", language="eng", **kwargs):
@@ -29,7 +38,7 @@ def load_callhome(variant="default", language="eng", **kwargs):
             One of:  'ara','deu','eng','jpn','spa','zho'
     """
     assert language in _LANGUAGES, f"Language must be one of: {_LANGUAGES}"
-    assert variant in _VARIANTS, f"Variant must be one of: {_VARIANTS}"
+    assert variant in VARIANTS, f"Variant must be one of: {VARIANTS}"
 
     kwargs.update({"name": variant, "language": language})
     dataset = load_dataset(_DATASET_LOADING_SCRIPT, **kwargs)

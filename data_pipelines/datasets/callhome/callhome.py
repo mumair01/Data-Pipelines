@@ -2,7 +2,14 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-19 14:30:32
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2022-07-26 15:22:55
+# @Last Modified time: 2023-06-07 11:10:22
+
+"""
+This script contains custom dataset implementation for the Callfriend corpus 
+using the datasets.BuilderConfig and datasets.GeneratorBasedBuilder objects. 
+Link: https://huggingface.co/docs/datasets/package_reference/builder_classes
+
+"""
 
 import sys
 import os
@@ -50,12 +57,43 @@ _AUDIO_FEATURES = {
 
 
 class CallHomeConfig(datasets.BuilderConfig):
+    """
+    Base class for DatasetBuilder data configuration.
+
+    DatasetBuilder subclasses with data configuration options should subclass
+    BuilderConfig and add their own properties.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.BuilderConfig
+    """
+
     def __init__(self, language, **kwargs):
+        """
+        Configuration for the Callhome corpus, which are used to build the
+        dataset.
+        Accepts additional kwargs that may be accepted by any dataset
+        https://huggingface.co/docs/datasets/package_reference/loading_methods
+
+        Parameters
+        ----------
+        language : str
+            Language for the callfriend corpus
+        """
         super().__init__(**kwargs)
         self.language = language
 
 
 class CallHome(datasets.GeneratorBasedBuilder):
+    """
+    Base class for datasets with data generation based on dict generators.
+
+    GeneratorBasedBuilder is a convenience class that abstracts away much of
+    the data writing and reading of DatasetBuilder. It expects subclasses to
+    implement generators of feature dictionaries across the dataset splits
+    (_split_generators). See the method docstrings for details.
+
+    Link: https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/builder_classes#datasets.DatasetBuilder
+    """
+
     _CACHE_DIR = "callhome"
 
     BUILDER_CONFIGS = [
