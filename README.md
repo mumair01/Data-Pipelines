@@ -23,8 +23,7 @@ might not be publicly available.
   - [Fisher](#fisher)
   - [Maptask](#maptask)
   - [Switchboard](#switchboard)
-- [Features Package](#features-package)
-- [Cleanup](#cleanup)
+- [Features Sub-package](#features-package)
 - [Acknowledgements]()
 
 ## Getting Started
@@ -356,21 +355,6 @@ The Features sub-package provides access to methods that may be used for these p
 
 **NOTE:** Further documentation is forthcoming.
 
-## Cleanup
-
-The datasets this project deals with are large and require a large amount of memory to store. This project aims to download a single copy of these datasets that may be used across projects. However, there may be times when this data must be deleted to free up space.
-
-
-```python
-
-from data_pipelines.datasets import DataPipeline
-
-dp = DataPipeline()
-# Remove all the cached datasets.
-dp.clear_cache()
-# Remove all the downloaded datasets.
-dp.clear_downloads()
-```
 
 ## Acknowledgements
 

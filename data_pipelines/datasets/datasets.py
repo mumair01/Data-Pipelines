@@ -2,13 +2,15 @@
 # @Author: Muhammad Umair
 # @Date:   2022-07-26 14:45:40
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 12:57:29
+# @Last Modified time: 2023-06-07 21:23:42
 
 import os
 import glob
 import shutil
 import datasets
+import subprocess
 from dataclasses import dataclass
+from sys import platform
 
 from typing import List, Dict, Callable
 
@@ -42,7 +44,6 @@ from data_pipelines.datasets.utils import reset_dir
 from data_pipelines.paths import PkgPaths
 
 _CACHE_DIR = PkgPaths.Core.cacheDir
-_DOWNLOADS_DIR = PkgPaths.Core.downloadDir
 
 
 @dataclass
@@ -69,11 +70,7 @@ class DataPipeline:
         "switchboard": DsetConfig(load_switchboard, SB_VARIANTS, SB_DETAILS),
     }
 
-    def __init__(
-        self,
-        cache_dir: str = _CACHE_DIR,
-        downloads_dir: str = _DOWNLOADS_DIR,
-    ):
+    def __init__(self, cache_dir: str = _CACHE_DIR):
         """_summary_
 
         Parameters
@@ -86,31 +83,28 @@ class DataPipeline:
             by default _DOWNLOADS_DIR
         """
         self._cache_dir = cache_dir
-        self._downloads_dir = downloads_dir
+        self._downloads_dir = os.path.join(self.cache_dir, "downloads")
 
     @property
     def cache_dir(self) -> str:
         return self._cache_dir
 
-    @property
-    def downloads_dir(self) -> str:
-        return self._downloads_dir
-
     def clear_cache(self):
         """
-        Remove all cached datasets.
-        NOTE: Does not remove downloads of the datasets.
+        Remove all downloaded and saved datasets.
+        NOTE: This will NOT remove the downloaded datasets. To do so, please
+        specify the download_mode="force_redownload" in the load_dset method.
         """
-        reset_dir(self._cache_dir)
-
-    def clear_downloads(self):
-        """
-        Removes all the downloaded datasets.
-        NOTE: Does NOT clear the cache. If the datasets should be regenerated
-        from existing downloads, then set download_mode="reuse_cache_if_exists"
-        in the load_dset method.
-        """
-        reset_dir(self._downloads_dir)
+        keep = [self._downloads_dir]
+        paths = [
+            os.path.join(self.cache_dir, p) for p in os.listdir(self.cache_dir)
+        ]
+        for path in paths:
+            if not any([path.__contains__(k) for k in keep]):
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                if os.path.isfile(path):
+                    os.remove(path)
 
     def supported_dsets(self) -> List[str]:
         """
@@ -130,8 +124,12 @@ class DataPipeline:
         **kwargs,
     ) -> datasets.Dataset:
         """
-            Load the specified dataset with dataset specific arguments provided as
+        Load the specified dataset with dataset specific arguments provided as
         additional keyword arguments.
+
+        NOTE: See link below for operation that can be performed on a dataset
+        object that us returned.
+        Link: https://huggingface.co/docs/datasets/v2.2.1/en/access
 
         Parameters
         ----------
@@ -200,3 +198,40 @@ class DataPipeline:
             dataset in self.supported_dsets()
         ), f"dataset must be one of: {self.supported_dsets()}"
         return self._DSETS[dataset].details
+
+    def open_downloads_dir(self, dataset: str):
+        """
+        Open the dataset in the system explorer for the specified dataset
+
+        Parameters
+        ----------
+        dataset : str
+            Name of the dataset for which the raw downloaded directory should be
+            opened
+
+        Raises
+        ------
+        Exception
+            Raised if the dataset download directory is not found.
+        NotImplementedError
+            Raised if the underlying platform is not supported.
+        """
+        assert (
+            dataset in self.supported_dsets()
+        ), f"dataset must be one of: {self.supported_dsets()}"
+
+        dset_download_path = os.path.join(self._downloads_dir, dataset)
+
+        if not os.path.isdir(dset_download_path):
+            raise Exception(
+                f"No download directory found for dataset {dataset} at: {dset_download_path}"
+            )
+
+        if platform == "linux" or platform == "linux2":
+            # linux
+            raise NotImplementedError()
+        elif platform == "darwin":
+            subprocess.run(["/usr/bin/open", dset_download_path])
+        elif platform == "win32":
+            # Windows...
+            raise NotImplementedError()
