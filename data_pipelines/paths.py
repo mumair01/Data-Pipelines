@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2023-05-23 09:29:23
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 11:48:19
+# @Last Modified time: 2023-06-07 20:38:44
 
 
 """
@@ -25,8 +25,6 @@ _CACHE_ROOT = os.path.join(os.path.expanduser("~"), ".cache/data_pipelines")
 _CACHE_DIR = os.path.join(
     os.path.expanduser("~"), ".cache/data_pipelines/datasets"
 )
-# Directory used to store temporary files when downloading datasets.
-_DOWNLOADS_DIR = os.path.join(_CACHE_ROOT, "downloads")
 # Path to the configuration directory, which contains, amongst other things,
 # configs for the opensmile package.
 _CONFIGS_DIR = os.path.join(_MODULE_PATH, "configs")
@@ -66,7 +64,6 @@ class PkgPaths:
         datasetsMod: str = os.path.join(_MODULE_PATH, "datasets")
         featuresMod: str = os.path.join(_MODULE_PATH, "features")
         cacheDir: str = _CACHE_DIR
-        downloadDir: str = _DOWNLOADS_DIR
 
     @dataclass
     class Exe:

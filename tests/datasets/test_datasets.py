@@ -2,7 +2,7 @@
 # @Author: Muhammad Umair
 # @Date:   2023-06-07 12:03:10
 # @Last Modified by:   Muhammad Umair
-# @Last Modified time: 2023-06-07 19:42:35
+# @Last Modified time: 2023-06-07 21:23:55
 
 import pytest
 
@@ -95,3 +95,17 @@ def test_extract_audio_dset_features():
     dset_splits = dset["full"].train_test_split(test_size=0.01)
     test_dset = dset_splits["test"]
     test_dset = test_dset.map(extract_gemaps)
+
+
+@pytest.mark.parametrize(
+    "dataset",
+    ["callfriend", "callhome", "maptask"],
+)
+def test_open_downloads_dir(dataset):
+    dp = DataPipeline()
+    dp.open_downloads_dir(dataset)
+
+
+def test_clear_cache():
+    dp = DataPipeline()
+    dp.clear_cache()
