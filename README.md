@@ -1,21 +1,9 @@
 # Data Pipelines
 
-The data pipelines project allows users to load multiple datasets useful for
-research in conversational AI, spoken dialogue systems, and linguistics.
-
-It leverages the [transformers dataset infrastructure](https://huggingface.co/docs/datasets/quickstart)
-to download and provide efficient access to variations of the same datasets -
-maintaining a single copy of the raw data and using minimal disk space to store
-dataset variations. Additionally, it provides access to a features package that can be used to extract commonly required features from these datasets (e.g., voice activity).
-
-The goal is to abstract the process of loading datasets that are useful for
-conversation research and allow researchers to focus on model development. It
-is unique because it provides access to tools and variations of datasets that
-might not be publicly available.
-
 ## In this README
 
-- [Getting Started](#getting-started)
+- [About](#about)
+- [Environment Setup](#environment-setup)
 - [Basic Usage](#basic-usage)
 - [Datasets and Variants](#datasets-and-variants)
   - [Callfriend](#callfriend)
@@ -23,13 +11,46 @@ might not be publicly available.
   - [Fisher](#fisher)
   - [Maptask](#maptask)
   - [Switchboard](#switchboard)
-- [Features Sub-package](#features-package)
+- [Features Package](#features-package)
 - [Acknowledgements]()
 
-## Getting Started
+## About 
+
+The data pipelines project allows users to load multiple datasets useful for
+research in conversational AI, spoken dialogue systems, and linguistics. It leverages the [transformers dataset infrastructure](https://huggingface.co/docs/datasets/quickstart) to download and provide efficient access to variations of the same datasets, maintaining a single copy of the raw data and using minimal disk space to store dataset variations. Additionally, it provides access to a features package that can be used to extract commonly required features from these datasets (e.g., voice activity).
+
+The goal is to abstract the process of loading datasets that are useful for
+conversation research and allow researchers to focus on model development. It
+is unique because it provides access to tools and variations of datasets that
+might not be publicly available.
+
+## Environment Setup
+
+### Conda setup
 
 
-**IMPORTANT**: This repository only works on the i386 architecture on Mac OSX, not the arm64 architecture used in the newer Macs. 
+**IMPORTANT**: This repository uses x86 versions of certain packages, which is 
+the default on intel (i386) Macs but not for the newer (apple silicon) Macs.
+
+Intel Macs (i386): Use the following instructions to set up and activate a conda environment:
+
+```
+conda create -n data_p_x86 python=3.10
+conda activate data_p
+```
+
+Apple Macs (arm64): Use the following instructions to set up and activate a conda environment:
+
+```
+CONDA_SUBDIR=osx-64 conda create -n data_p_x86 python=3.10
+conda activate data_p_x86
+conda config --env --set subdir osx-64
+```
+
+Note: The name of the conda environment will be 'data_p_x86'.
+
+
+### Package setup
 
 The first step is to install data pipelines as a python package that can be
 imported in python scripts. There is no pypi registry for this project.
@@ -351,7 +372,7 @@ Before use, please download the media [here](""https://catalog.ldc.upenn.edu/LDC
 
 The goal of this project is to be able to easily download and parse commonly used dataset in Conversational AI research. The ```load_dataset``` method describes in previous methods provides access to common features for each dataset. However, depending on the application, there may be a need to extract additional features. For example, audio feature sets (such as GeMAPS) may be required - or voice activity from the transcripts may be required.
 
-The Features sub-package provides access to methods that may be used for these purposes. The goal is to map these methods on the dataset and save them for efficient access later.
+The Features package provides access to methods that may be used for these purposes. The goal is to map these methods on the dataset and save them for efficient access later.
 
 **NOTE:** Further documentation is forthcoming.
 
