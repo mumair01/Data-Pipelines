@@ -15,6 +15,17 @@ import os
 import json
 from typing import Type
 from collections.abc import Callable
+from getpass import getpass, getuser
+import smbclient
+from tqdm import tqdm
+
+@dataclass
+class DownloadPaths:
+    """
+    Stores the download paths of a generic file
+    """
+    download_path: str
+
 
 class GenericDownloader:
     """
@@ -48,11 +59,7 @@ class GenericDownloader:
         )
 
     def __download_files(self, download_func: Callable, *args, **kwargs):
-        return download_func(*args, **kwargs)
-
-    def __generate_dataclass(self) -> Type:
-        fields = [(key, str) for key in self.metadata.keys()]
-        return dataclass("DownloadPaths", fields)                
+        return download_func(*args, **kwargs)             
     
     def __verify(self) -> bool:
         return (
@@ -63,31 +70,65 @@ class TTSClusterDownloader(GenericDownloader):
     """
     Utility for downloading both the annotations and dialogues from useful corpora from the TTS Cluster
     """
-    def __init__(self) -> None:
-        super().__init__()
-        # authentication methods
-
-    def __call__(self, root_dir: str | os.PathLike, relative_paths: list[str | os.PathLike]):
-        DownloadPaths = self.__generate_dataclass()
-        paths_to_downloads = self.__get_paths_to_downloads(root_dir=root_dir, relative_paths=relative_paths)
-        pathsets = self.__download_folders(paths_to_downloads=paths_to_downloads)
-        return [DownloadPaths(**pathset) for pathset in pathsets]
-            
-    def __get_paths_to_downloads(self, root_dir: str | os.PathLike, relative_paths: list[str | os.PathLike]) -> list[str | os.PathLike]:
-        return [os.path.join(root_dir, rel_path) for rel_path in relative_paths]
-
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.username = getuser()
+        self.password = getpass()
+        self.domain_controller = input("Enter domain controller: ")
+        self.path_to_share = input("Enter the path to the share: ")
+        smbclient.ClientConfig(
+            username=self.username,
+            password=self.password,
+            domain_controller=self.domain_controller
+        )
+    
     def __download_func(self):
-        paths = self.download_paths # from metadata.json, should be a list of highest-level paths
-        for path in paths:
-            shutil.copytree(path, self.output_dir)
+        files = []
+        paths = [fr"{self.path_to_share}\{d}" for d in smbclient.listdir(self.path_to_share) if d in self.download_paths]
+        print('Retrieving files from Cold Storage...')
+        for path in tqdm(paths):
+            path_walk = [f for f in smbclient.walk(path)]
+            for subdir_tup in path_walk[1:]:
+                subdir = subdir_tup[0]
+                subdir_files = subdir_tup[-1]
+                files += [fr"{subdir}\{sdf}" for sdf in subdir_files]
 
-    def __download_folders(self, paths_to_downloads: list[str | os.PathLike]) -> list[Type]:
-        return [self.__download_files(self.__download_func, path_to_downloads) for path_to_downloads in paths_to_downloads]
+        print('Writing files from Cold Storage...')
+        for file in tqdm(files):
+            with smbclient.open_file(file, 'rb') as f:
+                this_file = f.read()
+            dst_subdir = r'/'.join(file.split('\\')[6:-1])
+            filename = file.split('\\')[-1]
+            os.makedirs(fr"{self.output_dir}/{dst_subdir}", exist_ok=True)
+            with open(fr'{self.output_dir}/{dst_subdir}/{filename}', 'wb') as f:
+                f.write(this_file)
+        return files
+    
+    def __download_files(self, download_func: Callable):
+        return download_func()
 
-    def upload_folder(self, folder_to_upload: str | os.PathLike, dest_paths: list[str | os.PathLike]):
-        for path in dest_paths:
-            shutil.copytree(folder_to_upload, path)
+    def __call__(self):
+        paths = self.__download_files(self.__download_func)
+        return [DownloadPaths(path) for path in paths]           
 
-    def upload_file(self, file_to_upload: str | os.PathLike, dest_paths: list[str | os.PathLike]):
-        for path in dest_paths:
-            shutil.copy2(file_to_upload, path)
+    def upload_to_share(self):
+        paths_on_share = []
+        for path in self.upload_paths: 
+            with open(path, 'rb') as f:
+                this_doc = f.read()
+            
+            upload_paths_split = path.split('/')
+            if len(upload_paths_split) > 2:
+                dst_subdir = '\\'.join(upload_paths_split[1:-1])
+                full_dst = fr"{self.path_to_share}\{dst_subdir}"
+                smbclient.makedirs(full_dst, exist_ok=True)
+                dst_file_path = fr"{full_dst}\{upload_paths_split[-1]}"
+                with smbclient.open_file(dst_file_path, 'wb') as f:
+                    f.write(this_doc)
+            else:
+                dst_file_path = fr"{self.path_to_share}\{upload_paths_split[-1]}"
+                with smbclient.open_file(dst_file_path, 'wb') as f:
+                    f.write(this_doc)
+            paths_on_share.append(dst_file_path)
+        
+        return [DownloadPaths(p) for p in paths_on_share]
